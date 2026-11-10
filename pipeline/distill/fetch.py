@@ -78,18 +78,27 @@ def read_into(fs, url: str, grid: dict | None, site: Site) -> tuple[dict, dict[s
         r_off = int(round((y[0] - grid["y0"]) / dx))
         c0, c1 = max(c_off, 0), min(c_off + fine_cols, len(x))
         r0, r1 = max(r_off, 0), min(r_off + fine_rows, len(y))
-        out = {}
-        for pol in ("HHHH", "HVHV"):
-            full = np.full((fine_rows, fine_cols), np.nan, np.float32)
-            if c1 > c0 and r1 > r0:
-                a = g[pol][r0:r1, c0:c1].astype(np.float32)
+        out = {pol: np.full((grid["rows"], grid["cols"]), np.nan, np.float32) for pol in ("HHHH", "HVHV")}
+        if c1 <= c0 or r1 <= r0:
+            return grid, out
+        strip = 512 * LOOKS
+        for top in range(0, fine_rows, strip):
+            lo, hi = max(top + r_off, r0), min(top + strip + r_off, r1)
+            if hi <= lo:
+                continue
+            for pol in ("HHHH", "HVHV"):
+                block = np.full((strip, fine_cols), np.nan, np.float32)
+                a = g[pol][lo:hi, c0:c1].astype(np.float32)
                 a[a <= 0] = np.nan
-                full[r0 - r_off : r1 - r_off, c0 - c_off : c1 - c_off] = a
-            out[pol] = multilook(full, LOOKS)
+                block[lo - r_off - top : hi - r_off - top, c0 - c_off : c1 - c_off] = a
+                coarse = multilook(block, LOOKS)
+                row0 = top // LOOKS
+                rows = min(coarse.shape[0], grid["rows"] - row0)
+                out[pol][row0 : row0 + rows, : coarse.shape[1]] = coarse[:rows]
     return grid, out
 
 
-def fetch_site(site: Site, workers: int = 3) -> None:
+def fetch_site(site: Site, workers: int = 2) -> None:
     out = CACHE / site.id
     out.mkdir(parents=True, exist_ok=True)
     passes = find_passes(site)
