@@ -35,12 +35,12 @@ export function Atlas() {
   const [events, setEvents] = useState<ChangeEvent[]>([]);
   const [radar, setRadar] = useState<RadarManifest | null>(null);
   const [pass, setPass] = useState<string | null>(null);
-  const [selected, setSelected] = useState<string | null>(null);
   const [hidden, setHidden] = useState<Set<ChangeType>>(new Set());
   const [playing, setPlaying] = useState(false);
   const [radarOn, setRadarOn] = useState(true);
   const [camera, setCamera] = useState<Camera | null>(null);
   const [initial] = useState(() => (typeof window === "undefined" ? null : readViewState(window.location.search)));
+  const [selected, setSelected] = useState<string | null>(initial?.event ?? null);
   const [focusKey, setFocusKey] = useState<string | null>(null);
 
   const site = sites?.find((s) => s.id === siteId) ?? null;
@@ -76,48 +76,38 @@ export function Atlas() {
     };
   }, [siteId]);
 
-  useEffect(() => {
-    if (!site) return;
-    setPass((p) => {
-      if (p && site.passes.some((x) => x.date === p)) return p;
-      const fromUrl = initial?.site === site.id ? initial.pass : null;
-      if (fromUrl && site.passes.some((x) => x.date === fromUrl)) return fromUrl;
-      return site.passes.find((x) => !x.baseline)?.date ?? site.passes[0].date;
-    });
-  }, [site, initial]);
+  const current = useMemo(() => {
+    if (!site) return null;
+    const has = (d: string | null | undefined): d is string => !!d && site.passes.some((x) => x.date === d);
+    if (has(pass)) return pass;
+    const fromUrl = initial?.site === site.id ? initial.pass : null;
+    if (has(fromUrl)) return fromUrl;
+    return site.passes.find((x) => !x.baseline)?.date ?? site.passes[0].date;
+  }, [site, pass, initial]);
 
   useEffect(() => {
-    if (initial?.event && events.some((e) => e.id === initial.event)) setSelected(initial.event);
-  }, [events, initial]);
-
-  useEffect(() => {
-    writeViewState({ site: siteId, event: selected, pass: siteId ? pass : null, camera });
-  }, [siteId, selected, pass, camera]);
+    writeViewState({ site: siteId, event: selected, pass: current, camera });
+  }, [siteId, selected, current, camera]);
 
   const step = useCallback(
     (dir: 1 | -1) => {
-      if (!passes.length || !pass) return;
-      const i = passes.findIndex((p) => p.date === pass);
+      if (!passes.length || !current) return;
+      const i = passes.findIndex((p) => p.date === current);
       const next = passes[Math.min(Math.max(i + dir, 0), passes.length - 1)];
       setPass(next.date);
     },
-    [passes, pass],
+    [passes, current],
   );
 
   useEffect(() => {
-    if (!playing || !passes.length) return;
-    const t = setInterval(() => {
-      setPass((cur) => {
-        const i = passes.findIndex((p) => p.date === cur);
-        if (i >= passes.length - 1) {
-          setPlaying(false);
-          return cur;
-        }
-        return passes[i + 1].date;
-      });
+    if (!playing || !current) return;
+    const t = setTimeout(() => {
+      const i = passes.findIndex((p) => p.date === current);
+      if (i >= passes.length - 1) setPlaying(false);
+      else setPass(passes[i + 1].date);
     }, PLAY_MS);
-    return () => clearInterval(t);
-  }, [playing, passes]);
+    return () => clearTimeout(t);
+  }, [playing, current, passes]);
 
   const chooseSite = useCallback((id: string) => {
     setSiteId(id);
@@ -176,7 +166,7 @@ export function Atlas() {
       type: "FeatureCollection",
       features: events.flatMap((e) => {
         if (hidden.has(e.change_type)) return [];
-        const fp = e.footprint_by_pass.find((f) => f.date === pass);
+        const fp = e.footprint_by_pass.find((f) => f.date === current);
         if (!fp) return [];
         return [
           {
@@ -188,13 +178,13 @@ export function Atlas() {
         ];
       }),
     }),
-    [events, pass, hidden],
+    [events, current, hidden],
   );
 
   const radarImage = useMemo<Radar>(() => {
-    const frame = radar?.frames.find((f) => f.date === pass);
+    const frame = radar?.frames.find((f) => f.date === current);
     return radar && frame ? { url: `/radar/${radar.site}/${frame.image}`, coordinates: radar.coordinates } : null;
-  }, [radar, pass]);
+  }, [radar, current]);
 
   const typeCounts = useMemo(() => {
     const m = new Map<ChangeType, number>();
@@ -254,7 +244,7 @@ export function Atlas() {
         )}
       </nav>
 
-      {site && pass && passes.length > 0 && (
+      {site && current && passes.length > 0 && (
         <footer className={styles.dock}>
           <div className={styles.legend}>
             {typeCounts.map(([t, n]) => (
@@ -283,7 +273,7 @@ export function Atlas() {
             </label>
             <span className={styles.visible}>{visibleNow === 0 ? "No change on this pass" : `${visibleNow} changing on this pass`}</span>
           </div>
-          <Timeline passes={passes} current={pass} playing={playing} onPass={(d) => { setPlaying(false); setPass(d); }} onPlay={() => setPlaying((p) => !p)} />
+          <Timeline passes={passes} current={current} playing={playing} onPass={(d) => { setPlaying(false); setPass(d); }} onPlay={() => setPlaying((p) => !p)} />
         </footer>
       )}
 
@@ -325,7 +315,7 @@ export function Atlas() {
             passes={passes}
             areaByDate={new Map(event.footprint_by_pass.map((f) => [f.date, f.area_km2]))}
             color={CHANGE_TYPES[event.change_type].color}
-            current={pass}
+            current={current}
             onPick={(d) => {
               setPlaying(false);
               setPass(d);

@@ -34,7 +34,9 @@ export function MapView(props: Props) {
   const [ready, setReady] = useState(false);
   const [tip, setTip] = useState<{ x: number; y: number; text: string } | null>(null);
   const handlers = useRef(props);
-  handlers.current = props;
+  useEffect(() => {
+    handlers.current = props;
+  });
 
   useEffect(() => {
     if (!container.current) return;
