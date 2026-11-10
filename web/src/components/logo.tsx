@@ -1,5 +1,5 @@
 // A pixel droplet. Its bottom row carries the three change colors the first sites show.
-const ROWS = ["..X..", ".XXX.", ".XXX.", "XXXXX", "XXXXX", ".ABC."] as const;
+const ROWS = ["..X..", "..X..", ".XXX.", "XXXXX", "XXXXX", ".ABC."] as const;
 const COLORS: Record<string, string> = { A: "#3987e5", B: "#d95926", C: "#199e70" };
 const CELL = 10;
 const GAP = 1.5;

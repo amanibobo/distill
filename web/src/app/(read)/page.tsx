@@ -1,5 +1,5 @@
 import { Highlights } from "@/components/highlights";
-import { Ink, Label, Mark, Mono } from "@/components/prose";
+import { Ink, Label, Mark } from "@/components/prose";
 
 export default function Home() {
   return (
@@ -39,7 +39,7 @@ export default function Home() {
       <section aria-labelledby="how">
         <Label id="how">how to use it</Label>
         <p>
-          Open the map and pick a place. Press play, or use <Mono>←</Mono> and <Mono>→</Mono>, to step through the passes. Click any
+          Open the map and pick a place. Press play, or use the arrow keys, to step through the passes. Click any
           colored shape to see what changed, when, and why Distill thinks so. Every view has its own link, so you can send exactly
           what you are looking at.
         </p>
