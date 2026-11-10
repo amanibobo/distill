@@ -22,7 +22,7 @@ Event type comes from rules on the signature and timing (HH/HV change, onset-to-
 
 Three GCOV sites, one per timing shape. Venezuela (GUNW) waits for the 3D milestone. The agent confirms coverage with `asf_search` before downloading and swaps a site if passes are thin.
 
-- **Flood: Upper Assam, India, July–Aug 2026.** Monsoon floods after 18–20 July rain, 7 districts. Known NISAR GCOV passes on track 40 (21–22 Jul, 15 Aug) and track 163 (10–12 Aug). Ground truth: Copernicus EMS EMSR935, cloud-free Sentinel-2 water. Watch out: July rice transplanting looks like new water. This is a good test for timing rules. Backup: Chao Phraya, Thailand, Sep–Oct 2026.
+- **Flood: Upper Assam, India, July–Aug 2026.** Monsoon floods after 18–20 July rain, 7 districts. Known NISAR GCOV passes on track 40 (21–22 Jul, 15 Aug) and track 163 (10–12 Aug). Ground truth: Sentinel-1 RTC water (see 2026-11-10 correction). Watch out: July rice transplanting looks like new water. This is a good test for timing rules. Backup: Chao Phraya, Thailand, Sep–Oct 2026.
 - **Fire scar: Kaiser Canyon Fire, Okanogan/Ferry counties, Washington.** Lightning start 16 Jul 2026, ~138,293 acres, contained ~7 Sep. Grew over weeks, which fits "still expanding." Ground truth: NIFC final perimeter, FIRMS hotspots by date for growth.
 - **Harvest: central Iowa corn and soybean, Sep–Nov 2026.** Ground truth: USDA CDL 2025 for field crop type, HLS/Sentinel-2 NDVI drop for per-field harvest date.
 
@@ -45,3 +45,17 @@ Opens on a dark globe with the three sites glowing in their event colors and one
 ## 2026-11-10 — Hosted Supabase, not local
 
 Supersedes the local Supabase CLI note. Events live in a hosted Supabase free project with PostGIS and pgvector. The connection string goes in `/Users/amanibobo/distill/.env` as `DATABASE_URL`. Earthdata credentials are in `~/.netrc`, and `ANTHROPIC_API_KEY` is in `.env`.
+
+## 2026-11-10 — Site data, checked against ASF
+
+Correction: EMSR935 is the October 2026 Valencia flood, not Assam. Copernicus EMS has no Assam activation. Assam ground truth is Sentinel-1 RTC (C-band, Planetary Computer) water on 22 Jul and 15 Aug, the same days as NISAR passes, with JRC permanent water removed.
+
+One track per site keeps geometry constant across the cube:
+
+| Site | Track | Passes | Area (lon, lat) |
+| --- | --- | --- | --- |
+| Assam | 040 ascending | 12, 16 Jun to 7 Nov | 94.2 to 95.0, 26.6 to 27.5 |
+| Kaiser Canyon | 071 descending | 10, 19 Jun to 17 Oct | -119.45 to -118.65, 48.0 to 48.42 (NIFC perimeter plus buffer) |
+| Iowa | 004 ascending | 11, 26 Jun to 24 Oct | -94.0 to -93.2, 41.85 to 42.2 (Story and Boone counties) |
+
+Files are never downloaded whole (about 7 GB each, and the disk has under 3 GB free). The fetch streams the site window over HTTPS with Earthdata auth, multilooks 4x4 to 40 m, and caches float16 dB per pass. FIRMS needs an API key, so Kaiser Canyon growth is checked against the NIFC final perimeter only.
