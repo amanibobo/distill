@@ -71,18 +71,18 @@ def classify(f: Features) -> Label:
             f"HH brightened by {_db(f.peak_d_hh)} over vegetation and then faded, the double-bounce pattern of water standing under crops or reeds.",
         )
 
-    if f.direction == "darker" and not f.recovered and crop >= 0.5 and f.onset.month >= 9 and f.peak_d_hv <= -2:
-        conf = 0.55 + 0.3 * _margin(crop, 0.5, 0.4) + 0.1 * _margin(-f.peak_d_hv, 2, 4)
+    if f.direction == "darker" and not f.recovered and crop >= 0.5 and f.onset.month >= 9 and f.peak_d_hv <= -1:
+        conf = 0.55 + 0.3 * _margin(crop, 0.5, 0.4) + 0.1 * _margin(-f.peak_d_hv, 1, 3)
         return Label(
             ChangeType.harvest,
             _clip(conf),
             f"Cross-polarized return fell {_db(f.peak_d_hv)} on cropland in autumn and stayed low, which is what happens when standing crops are cut.",
         )
 
-    if f.direction == "darker" and not f.recovered and vegetated >= 0.5 and f.peak_d_hv <= -2:
+    if f.direction == "darker" and not f.recovered and vegetated >= 0.5 and f.peak_d_hv <= -1:
         if f.growth_passes >= 1 or f.peak_area_km2 >= 5:
             grew = f"grew over {f.growth_passes + 1} passes" if f.growth_passes else "covers a large area"
-            conf = 0.55 + 0.2 * _margin(vegetated, 0.5, 0.4) + 0.15 * _margin(-f.peak_d_hv, 2, 4)
+            conf = 0.55 + 0.2 * _margin(vegetated, 0.5, 0.4) + 0.15 * _margin(-f.peak_d_hv, 1, 3)
             return Label(
                 ChangeType.fire_scar,
                 _clip(conf),

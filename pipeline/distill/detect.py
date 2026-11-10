@@ -7,12 +7,14 @@ from enum import Enum
 
 import numpy as np
 from scipy import ndimage
+from scipy.ndimage import uniform_filter
 from skimage.measure import label
 
 from distill.cube import Cube
 
-DROP_DB = 3.0
-RISE_DB = 3.0
+NOISE_K = 3.0
+MIN_THRESHOLD_DB = 1.0
+SMOOTH_PX = 5
 MIN_PEAK_KM2 = 0.5
 MIN_SINGLE_PASS_KM2 = 2.0
 GROWTH = 0.1
@@ -100,24 +102,53 @@ class Event:
         return np.stack([self.d_hh, self.d_hv, frac], axis=1)
 
 
-def baseline_change(cube: Cube) -> tuple[np.ndarray, np.ndarray]:
-    with warnings.catch_warnings():
-        warnings.simplefilter("ignore", RuntimeWarning)
-        base_hh = np.nanmedian(cube.hh[cube.baseline], axis=0)
-        base_hv = np.nanmedian(cube.hv[cube.baseline], axis=0)
-    return cube.hh - base_hh, cube.hv - base_hv
+def smooth(a: np.ndarray) -> np.ndarray:
+    ok = np.isfinite(a)
+    num = uniform_filter(np.where(ok, a, 0), SMOOTH_PX)
+    den = uniform_filter(ok.astype(np.float32), SMOOTH_PX)
+    out = num / np.maximum(den, 1e-6)
+    out[den < 0.5] = np.nan
+    return out
 
 
-def change_masks(d_hh: np.ndarray, d_hv: np.ndarray, monitored: np.ndarray) -> dict[Direction, np.ndarray]:
-    darker = (d_hh <= -DROP_DB) | (d_hv <= -DROP_DB)
-    brighter = (d_hh >= RISE_DB) & ~darker
-    open_ = np.ones((1, 3, 3), bool)
-    masks = {}
-    for direction, m in ((Direction.darker, darker), (Direction.brighter, brighter)):
-        m = m & monitored[:, None, None]
-        m = ndimage.binary_opening(m, structure=open_)
-        masks[direction] = m
-    return masks
+def change(cube: Cube, stable: np.ndarray) -> tuple[tuple[np.ndarray, np.ndarray], tuple[np.ndarray, np.ndarray]]:
+    """dB change vs the baseline median, minus each pass's scene-wide shift on land that should not change.
+
+    Returns (raw, smoothed) for HH and HV; smoothed decides where change is, raw trims the blur at its edges."""
+    raws, smooths = [], []
+    for db in (cube.hh, cube.hv):
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore", RuntimeWarning)
+            base = np.nanmedian(db[cube.baseline], axis=0)
+            raw = db - base
+            sm = np.stack([smooth(x) for x in raw])
+            shift = np.nan_to_num(np.array([np.nanmedian(x[stable]) for x in sm]))[:, None, None]
+        raws.append(raw - shift)
+        smooths.append(sm - shift)
+    return (raws[0], raws[1]), (smooths[0], smooths[1])
+
+
+def noise_threshold(d: np.ndarray, baseline: np.ndarray) -> float:
+    """Three robust standard deviations of pass-to-pass change among the baseline passes."""
+    idx = np.flatnonzero(baseline)
+    sigmas = []
+    for a, b in zip(idx[:-1], idx[1:]):
+        diff = d[b] - d[a]
+        sigmas.append(1.4826 * np.nanmedian(np.abs(diff - np.nanmedian(diff))) / np.sqrt(2))
+    return max(NOISE_K * float(np.mean(sigmas)), MIN_THRESHOLD_DB)
+
+
+def change_masks(raw: tuple[np.ndarray, np.ndarray], sm: tuple[np.ndarray, np.ndarray], cube: Cube) -> dict[Direction, np.ndarray]:
+    (raw_hh, raw_hv), (d_hh, d_hv) = raw, sm
+    thr_hh = noise_threshold(d_hh, cube.baseline)
+    thr_hv = noise_threshold(d_hv, cube.baseline)
+    darker = ((d_hh <= -thr_hh) & (raw_hh <= -thr_hh)) | ((d_hv <= -thr_hv) & (raw_hv <= -thr_hv))
+    brighter = (d_hh >= thr_hh) & (raw_hh >= thr_hh) & ~darker
+    tidy = np.ones((1, 3, 3), bool)
+    return {
+        direction: ndimage.binary_opening(ndimage.binary_closing(m & cube.monitored[:, None, None], structure=tidy), structure=tidy)
+        for direction, m in ((Direction.darker, darker), (Direction.brighter, brighter))
+    }
 
 
 def keep(areas: np.ndarray) -> bool:
@@ -126,9 +157,13 @@ def keep(areas: np.ndarray) -> bool:
     return peak >= MIN_PEAK_KM2 and (passes >= 2 or peak >= MIN_SINGLE_PASS_KM2)
 
 
-def detect(cube: Cube) -> list[Event]:
-    d_hh, d_hv = baseline_change(cube)
-    masks = change_masks(d_hh, d_hv, cube.monitored)
+def detect(cube: Cube, stable: np.ndarray | None = None) -> list[Event]:
+    """`stable` marks land whose radar return should not change seasonally; it anchors the wet/dry correction."""
+    if stable is None:
+        stable = np.ones((cube.grid.rows, cube.grid.cols), bool)
+    raw, sm = change(cube, stable)
+    masks = change_masks(raw, sm, cube)
+    d_hh, d_hv = sm
     events: list[Event] = []
     for direction, mask in masks.items():
         labels = label(mask, connectivity=1)

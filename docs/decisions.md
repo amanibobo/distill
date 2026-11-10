@@ -40,6 +40,8 @@ Pipeline runs locally in Python and caches clipped subsets per site. Events go i
 
 ## 2026-11-09 — First-open experience
 
+_Updated 2026-11-10: the globe now lives at `/map`, behind a landing page. See below._
+
 Opens on a dark globe with the three sites glowing in their event colors and one line saying what Distill is. A small site list in a corner allows keyboard jumps. Clicking a site flies there and starts the timeline. The URL updates with site, event, pass, and camera so any view can be shared.
 
 ## 2026-11-10 — Hosted Supabase, not local
@@ -59,3 +61,33 @@ One track per site keeps geometry constant across the cube:
 | Iowa | 004 ascending | 11, 26 Jun to 24 Oct | -94.0 to -93.2, 41.85 to 42.2 (Story and Boone counties) |
 
 Files are never downloaded whole (about 7 GB each, and the disk has under 3 GB free). The fetch streams the site window over HTTPS with Earthdata auth, multilooks 4x4 to 40 m, and caches float16 dB per pass. FIRMS needs an API key, so Kaiser Canyon growth is checked against the NIFC final perimeter only.
+
+## 2026-11-10 — Landing page, process, and writeup
+
+Supersedes "opens on a dark globe" for `/`. The site has four pages:
+
+- `/` is a landing page modeled on binaryhq.vercel.app. Light ground, a narrow single column, a serif wordmark, a one-line lede, a dotted row of links (Open the map, Process, Writeup), a lowercase mono section label, and short paragraphs with marker highlights that draw in on scroll.
+- `/map` is the dark globe app, as specified in the earlier decisions.
+- `/process` covers how Distill was built: the decisions, the dead ends, and the corrections.
+- `/writeup` covers the technical architecture, with hand-drawn diagrams in the Excalidraw style. They are drawn with rough.js (the engine Excalidraw uses) and Excalifont, as code rather than an embedded Excalidraw editor.
+
+The map stays dark because it's an instrument. The reading pages stay light because they're editorial. Geist is the body face, not Inter.
+
+## 2026-11-10 — Change-type colors
+
+Validated against the dark map surface (#101113) with the dataviz palette checker, using all pairs. Flood is #3987e5, fire scar #d95926, and harvest #199e70. Other is a neutral gray. Adding yellow for harvest failed the color-blindness check against fire's orange. Every type is also named in words wherever it appears, so color is never the only cue.
+
+## 2026-11-10 — MapLibre alone, no deck.gl
+
+MapLibre GL 5 draws the globe, the event polygons (fill plus outline, with feature-state for hover and selection), and the per-pass radar images. deck.gl would add weight without adding anything this milestone needs.
+
+## 2026-11-10 — Thresholds come from measured noise
+
+A flat 3 dB threshold found 6% of the Kaiser Canyon burn. L-band HV inside the perimeter fell only about 1.2 dB, against 0.6 dB outside, and a rain pass on 30 Aug brightened the whole scene by 1.5 dB. Detection now runs in four steps:
+
+1. Change is measured against the baseline median per pixel.
+2. Each pass's scene-wide wet/dry shift is subtracted. The shift is measured on land that shouldn't change seasonally: not cropland, water, or wetland.
+3. Change is smoothed over 5x5 pixels (200 m) to find where it is, then trimmed back to pixels whose own change also clears the threshold.
+4. The threshold is three robust standard deviations of pass-to-pass change among the baseline passes, with a 1 dB floor.
+
+The perimeter is never used to set any of this. On Kaiser Canyon, pixel recall rose from 0.06 to 0.26 and precision went from 1.00 to 0.88. The remaining gap is a known L-band limit: burned grass barely changes in backscatter. Coherence loss from GUNW would close it, and that's a later milestone.
