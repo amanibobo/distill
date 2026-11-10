@@ -1,6 +1,7 @@
 """Turn detected events into the change event records the app and database read."""
 
 import numpy as np
+from affine import Affine
 from pyproj import Transformer
 from rasterio.features import shapes
 from shapely.geometry import MultiPolygon, mapping, shape
@@ -12,8 +13,9 @@ from distill.rasters import cover_fractions
 from distill.rules import Features, Label, classify
 
 
-def polygon(mask: np.ndarray, cube: Cube, to_wgs84) -> MultiPolygon:
-    parts = [shape(g) for g, v in shapes(mask.astype(np.uint8), mask=mask, transform=cube.grid.transform) if v == 1]
+def polygon(mask: np.ndarray, e: Event, cube: Cube, to_wgs84) -> MultiPolygon:
+    window_transform = cube.grid.transform * Affine.translation(e.window[1].start, e.window[0].start)
+    parts = [shape(g) for g, v in shapes(mask.astype(np.uint8), mask=mask, transform=window_transform) if v == 1]
     geom = unary_union(parts).simplify(cube.grid.res, preserve_topology=True).buffer(0)
     geom = transform(to_wgs84, geom)
     if geom.geom_type == "Polygon":
@@ -40,7 +42,7 @@ def build(cube: Cube, events: list[Event], landcover: np.ndarray) -> list[tuple[
     out = []
     counters: dict[str, int] = {}
     for e in events:
-        cover = cover_fractions(landcover, e.footprint)
+        cover = cover_fractions(landcover[e.window], e.footprint)
         label = classify(features(e, cover))
         onset = e.dates[e.onset]
         stem = f"{cube.site.id}-{onset:%m%d}"
@@ -50,7 +52,7 @@ def build(cube: Cube, events: list[Event], landcover: np.ndarray) -> list[tuple[
                 "pass_id": e.pass_ids[t],
                 "date": e.dates[t].isoformat(),
                 "area_km2": round(float(e.area_by_pass[t]), 2),
-                "geometry": mapping(polygon(e.voxels[t], cube, to_wgs84)),
+                "geometry": mapping(polygon(e.voxels[t], e, cube, to_wgs84)),
             }
             for t in e.active
         ]
@@ -58,7 +60,7 @@ def build(cube: Cube, events: list[Event], landcover: np.ndarray) -> list[tuple[
             "id": f"{stem}-{counters[stem]:02d}",
             "site": cube.site.id,
             "direction": e.direction.value,
-            "geometry": mapping(polygon(e.voxels[e.peak], cube, to_wgs84)),
+            "geometry": mapping(polygon(e.voxels[e.peak], e, cube, to_wgs84)),
             "footprint_by_pass": by_pass,
             "change_type": label.type.value,
             "confidence": label.confidence,

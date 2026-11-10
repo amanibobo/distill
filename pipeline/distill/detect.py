@@ -36,7 +36,8 @@ class Status(str, Enum):
 class Event:
     site: str
     direction: Direction
-    voxels: np.ndarray  # (T, H, W) bool, False outside monitored passes
+    voxels: np.ndarray  # (T, h, w) bool over the event's own bounding window, False outside monitored passes
+    window: tuple[slice, slice]  # where that window sits in the site grid
     dates: list[date]
     pass_ids: list[str]
     pixel_km2: float
@@ -175,18 +176,20 @@ def detect(cube: Cube, stable: np.ndarray | None = None) -> list[Event]:
             areas = local.sum(axis=(1, 2)) * cube.grid.pixel_km2
             if not keep(areas):
                 continue
-            voxels = np.zeros(mask.shape, bool)
-            voxels[sl] = local
+            voxels = np.zeros((mask.shape[0], *local.shape[1:]), bool)
+            voxels[sl[0]] = local
             fp = voxels.any(axis=0)
+            window = (sl[1], sl[2])
             with warnings.catch_warnings():
                 warnings.simplefilter("ignore", RuntimeWarning)
-                hh_series = np.nanmean(d_hh[:, fp], axis=1)
-                hv_series = np.nanmean(d_hv[:, fp], axis=1)
+                hh_series = np.nanmean(d_hh[:, window[0], window[1]][:, fp], axis=1)
+                hv_series = np.nanmean(d_hv[:, window[0], window[1]][:, fp], axis=1)
             events.append(
                 Event(
                     site=cube.site.id,
                     direction=direction,
                     voxels=voxels,
+                    window=window,
                     dates=cube.dates,
                     pass_ids=cube.pass_ids,
                     pixel_km2=cube.grid.pixel_km2,

@@ -40,7 +40,7 @@ def predicted_mask(cube: Cube, built: list[tuple[dict, Event, Label]], truth: Tr
     for _, e, label in built:
         if label.type.value != truth.name:
             continue
-        pred |= e.voxels[t] if t is not None else e.footprint
+        pred[e.window] |= e.voxels[t] if t is not None else e.footprint
     return pred
 
 
@@ -49,10 +49,10 @@ def event_agreement(cube: Cube, built, truth: Truth) -> dict:
     rows = []
     for record, e, label in built:
         fp = e.voxels[cube.dates.index(truth.when)] if truth.when else e.footprint
-        fp = fp & truth.valid
+        fp = fp & truth.valid[e.window]
         if fp.sum() == 0:
             continue
-        overlap = float((fp & truth.mask).sum() / fp.sum())
+        overlap = float((fp & truth.mask[e.window]).sum() / fp.sum())
         if NEGATIVE < overlap < POSITIVE:
             continue
         rows.append({"id": record["id"], "truth": overlap >= POSITIVE, "pred": label.type.value == truth.name, "km2": record["area_km2"]})
