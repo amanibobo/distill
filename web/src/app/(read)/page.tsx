@@ -22,12 +22,12 @@ export default function Home() {
             drained.
           </p>
           <p>
-            Each event gets a type, a confidence and <Mark tone="green">a reason in plain words</Mark>. Click a burn scar in
+            Each event gets a type, a confidence and <Mark tone="blue">a reason in plain words</Mark>. Click a burn scar in
             Washington and it tells you the forest canopy is gone and the patch kept growing for weeks.
           </p>
           <p>
-            We check ourselves against <Ink tone="orange">independent maps</Ink>: fire perimeters, crop surveys and another
-            satellite&rsquo;s water maps. <Mark tone="orange">The scores are published, good or bad.</Mark>
+            We check ourselves against <Ink tone="red">independent maps</Ink>: fire perimeters, crop surveys and another
+            satellite&rsquo;s water maps. <Mark tone="red">The scores are published, good or bad.</Mark>
           </p>
           <p>
             The first version covers three places: the Upper Assam floods, the Kaiser Canyon Fire and the harvest in central Iowa.

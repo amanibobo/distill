@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 
-export type Tone = "blue" | "orange" | "green";
+export type Tone = "blue" | "red";
 
 export const Mark = ({ tone, children }: { tone: Tone; children: ReactNode }) => <mark className={`hl hl-${tone}`}>{children}</mark>;
 

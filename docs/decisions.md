@@ -91,3 +91,11 @@ A flat 3 dB threshold found 6% of the Kaiser Canyon burn. L-band HV inside the p
 4. The threshold is three robust standard deviations of pass-to-pass change among the baseline passes, with a 1 dB floor.
 
 The perimeter is never used to set any of this. On Kaiser Canyon, pixel recall rose from 0.06 to 0.26 and precision went from 1.00 to 0.88. The remaining gap is a known L-band limit: burned grass barely changes in backscatter. Coherence loss from GUNW would close it, and that's a later milestone.
+
+## 2026-11-10 — Geist Mono, NASA accents, flat map
+
+These supersede earlier choices:
+
+- **Typeface.** Geist Mono everywhere: the reading pages, the map UI, the wordmark, and the panel titles. This replaces Geist and the serif wordmark. The hand-drawn diagrams keep the Excalidraw Virgil font.
+- **Accents.** NASA blue (#0b3d91) and NASA red (#fc3d21). The pixel droplet logo is NASA blue with one red cell on the reading pages, and light ink with the red cell on the dark map. Links and most marker highlights use blue, and red is used sparingly. The change-type colors on the map stay as they are, because they encode data.
+- **Map.** A flat Web Mercator map replaces the globe, and the idle spin is gone. The opening view frames all sites.

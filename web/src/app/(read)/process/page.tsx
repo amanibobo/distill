@@ -62,7 +62,7 @@ export default function Process() {
         <Label id="approach">approach</Label>
         <Highlights>
           <p>
-            Every layer had to run on <Mark tone="green">real NISAR data, never mock-ups</Mark>. That meant building the data
+            Every layer had to run on <Mark tone="blue">real NISAR data, never mock-ups</Mark>. That meant building the data
             pipeline before any interface and treating each surprise in the data as a decision to write down.
           </p>
           <p>

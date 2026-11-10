@@ -114,7 +114,7 @@ def run_site(site_id: str, captions: bool) -> dict:
     w, s, e, n = site.bbox
     payload = {
         "site": {"id": site.id, "name": site.name, "place": site.place, "bbox": [w, s, e, n], "track": site.track},
-        "passes": [{"date": f["date"], "pass_id": f["pass_id"], "baseline": bool(b)} for f, b in zip(manifest["frames"], cube.baseline)],
+        "passes": [{"date": f["date"], "pass_id": f["pass_id"], "baseline": not bool(m)} for f, m in zip(manifest["frames"], cube.monitored)],
         "events": records,
         "scores": scores,
     }

@@ -2,6 +2,7 @@
 
 import hashlib
 import json
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
 import anthropic
@@ -25,24 +26,28 @@ def _key(payload: dict) -> str:
     return hashlib.sha256(json.dumps(payload, sort_keys=True, default=str).encode()).hexdigest()[:16]
 
 
-def caption_events(payloads: list[dict], cache_path: Path) -> list[Caption]:
+def _caption(client: anthropic.Anthropic, payload: dict) -> dict:
+    response = client.messages.parse(
+        model=MODEL,
+        max_tokens=2000,
+        output_config={"effort": "low"},
+        system=SYSTEM,
+        messages=[{"role": "user", "content": json.dumps(payload, indent=2, default=str)}],
+        output_format=Caption,
+    )
+    if response.stop_reason == "refusal" or response.parsed_output is None:
+        raise RuntimeError(f"no caption: stop_reason={response.stop_reason}")
+    return response.parsed_output.model_dump()
+
+
+def caption_events(payloads: list[dict], cache_path: Path, workers: int = 6) -> list[Caption]:
     cache = json.loads(cache_path.read_text()) if cache_path.exists() else {}
-    client = anthropic.Anthropic()
-    out = []
-    for payload in payloads:
-        key = _key(payload)
-        if key not in cache:
-            response = client.messages.parse(
-                model=MODEL,
-                max_tokens=2000,
-                output_config={"effort": "low"},
-                system=SYSTEM,
-                messages=[{"role": "user", "content": json.dumps(payload, indent=2, default=str)}],
-                output_format=Caption,
-            )
-            if response.stop_reason == "refusal" or response.parsed_output is None:
-                raise RuntimeError(f"no caption for event {payload.get('id')}: stop_reason={response.stop_reason}")
-            cache[key] = response.parsed_output.model_dump()
-            cache_path.write_text(json.dumps(cache, indent=2))
-        out.append(Caption(**cache[key]))
-    return out
+    keys = [_key(p) for p in payloads]
+    todo = {k: p for k, p in zip(keys, payloads) if k not in cache}
+    if todo:
+        client = anthropic.Anthropic()
+        with ThreadPoolExecutor(workers) as pool:
+            for k, result in zip(todo, pool.map(lambda p: _caption(client, p), todo.values())):
+                cache[k] = result
+                cache_path.write_text(json.dumps(cache, indent=2))
+    return [Caption(**cache[k]) for k in keys]

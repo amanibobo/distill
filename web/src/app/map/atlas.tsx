@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { LogoMark } from "@/components/logo";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { CHANGE_TYPES, type ChangeType } from "@/lib/change-types";
 import { area, longDate, percent } from "@/lib/format";
@@ -126,7 +127,7 @@ export function Atlas() {
     setEvents([]);
     setRadar(null);
     setPlaying(false);
-    setFocusKey(`globe:${Date.now()}`);
+    setFocusKey(`world:${Date.now()}`);
   }, []);
 
   useEffect(() => {
@@ -194,7 +195,17 @@ export function Atlas() {
 
   const visibleNow = shapes.features.length;
   const focus = site && focusKey?.startsWith(site.id) ? { bbox: site.bbox, key: focusKey } : null;
-  const globeFocus = focusKey?.startsWith("globe") ? { bbox: [-150, -40, 150, 60] as [number, number, number, number], key: focusKey } : null;
+  const worldBox = useMemo<[number, number, number, number] | null>(() => {
+    if (!sites?.length) return null;
+    const pad = 25;
+    return [
+      Math.max(Math.min(...sites.map((s) => s.bbox[0])) - pad, -180),
+      Math.max(Math.min(...sites.map((s) => s.bbox[1])) - pad, -80),
+      Math.min(Math.max(...sites.map((s) => s.bbox[2])) + pad, 180),
+      Math.min(Math.max(...sites.map((s) => s.bbox[3])) + pad, 80),
+    ];
+  }, [sites]);
+  const worldFocus = worldBox && (focusKey?.startsWith("world") || (!focusKey && !initial?.camera)) ? { bbox: worldBox, key: focusKey ?? "world:start" } : null;
 
   return (
     <div className={styles.atlas}>
@@ -204,7 +215,7 @@ export function Atlas() {
         radar={radarImage}
         radarVisible={radarOn}
         selectedId={selected}
-        focus={focus ?? globeFocus}
+        focus={focus ?? worldFocus}
         initialCamera={initial?.camera ?? null}
         onSite={chooseSite}
         onEvent={setSelected}
@@ -213,6 +224,7 @@ export function Atlas() {
 
       <header className={styles.brand}>
         <Link href="/" className={styles.wordmark}>
+          <LogoMark className={styles.logo} />
           Distill
         </Link>
         <p className={styles.lede}>Where Earth&rsquo;s surface changed this year, seen by the NISAR radar through clouds and at night.</p>
@@ -230,7 +242,7 @@ export function Atlas() {
               <span className={styles.siteText}>
                 <span className={styles.siteName}>{s.name}</span>
                 <span className={styles.sitePlace}>
-                  {s.place} · {total} changes
+                  {total} changes · {s.place}
                 </span>
               </span>
               <kbd className={styles.key}>{i + 1}</kbd>
@@ -239,7 +251,7 @@ export function Atlas() {
         })}
         {siteId && (
           <button className={styles.back} onClick={backToGlobe}>
-            Back to the globe
+            Back to the world map
           </button>
         )}
       </nav>

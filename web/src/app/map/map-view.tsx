@@ -1,11 +1,13 @@
 "use client";
 
-import { Map as MapLibre, type GeoJSONSource, type ImageSource, type MapGeoJSONFeature } from "maplibre-gl";
+import { Map as MapLibre, setWorkerUrl, type GeoJSONSource, type ImageSource, type MapGeoJSONFeature } from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 import { useEffect, useRef, useState } from "react";
 import type { FeatureCollection, MultiPolygon, Point } from "geojson";
 import type { Camera } from "./url-state";
 import styles from "./atlas.module.css";
+
+setWorkerUrl("/maplibre-gl-worker.mjs");
 
 const BASEMAP = "https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json";
 const EMPTY: FeatureCollection = { type: "FeatureCollection", features: [] };
@@ -44,32 +46,16 @@ export function MapView(props: Props) {
     const map = new MapLibre({
       container: container.current,
       style: BASEMAP,
-      center: cam ? [cam.lng, cam.lat] : [-40, 28],
-      zoom: cam ? cam.zoom : 1.6,
+      center: cam ? [cam.lng, cam.lat] : [-20, 30],
+      zoom: cam ? cam.zoom : 1.8,
+      renderWorldCopies: false,
       attributionControl: { compact: true },
       maxPitch: 0,
       dragRotate: false,
     });
     mapRef.current = map;
 
-    let spinning = !cam;
-    const stopSpin = () => {
-      spinning = false;
-    };
-    map.on("mousedown", stopSpin);
-    map.on("touchstart", stopSpin);
-    map.on("wheel", stopSpin);
-    let raf = 0;
-    const spin = () => {
-      if (spinning && map.getZoom() < 2.5) {
-        const c = map.getCenter();
-        map.setCenter([c.lng + 0.035, c.lat]);
-      }
-      raf = requestAnimationFrame(spin);
-    };
-
     map.on("style.load", () => {
-      map.setProjection({ type: "globe" });
       map.addSource("radar", { type: "image", url: BLANK_IMAGE, coordinates: [[0, 1], [1, 1], [1, 0], [0, 0]] });
       map.addLayer({ id: "radar", type: "raster", source: "radar", paint: { "raster-opacity": 0, "raster-fade-duration": 0 } });
       map.addSource("events", { type: "geojson", data: EMPTY, promoteId: "id" });
@@ -108,7 +94,6 @@ export function MapView(props: Props) {
         paint: { "circle-radius": 4.5, "circle-color": ["get", "color"], "circle-stroke-width": 1.5, "circle-stroke-color": "#0b0c0e" },
       });
       setReady(true);
-      raf = requestAnimationFrame(spin);
     });
 
     let hovered: string | null = null;
@@ -145,7 +130,6 @@ export function MapView(props: Props) {
     });
 
     return () => {
-      cancelAnimationFrame(raf);
       map.remove();
       mapRef.current = null;
     };
@@ -178,7 +162,7 @@ export function MapView(props: Props) {
     if (!ready || !map) return;
     const src = map.getSource("radar") as ImageSource | undefined;
     if (props.radar) src?.updateImage({ url: props.radar.url, coordinates: props.radar.coordinates });
-    map.setPaintProperty("radar", "raster-opacity", props.radar && props.radarVisible ? 0.55 : 0);
+    map.setPaintProperty("radar", "raster-opacity", props.radar && props.radarVisible ? 0.42 : 0);
   }, [ready, props.radar, props.radarVisible]);
 
   const focusKey = props.focus?.key;
@@ -191,7 +175,7 @@ export function MapView(props: Props) {
         [w, s],
         [e, n],
       ],
-      { padding: { top: 80, bottom: 150, left: 340, right: 80 }, duration: 2200, essential: true },
+      { padding: { top: 80, bottom: 150, left: 360, right: 80 }, duration: 1800, essential: true, maxZoom: 10 },
     );
     // Fly only when the focus target changes, not on every render of the same bbox.
     // eslint-disable-next-line react-hooks/exhaustive-deps
