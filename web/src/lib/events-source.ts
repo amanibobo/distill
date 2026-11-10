@@ -47,7 +47,7 @@ export async function siteEvents(id: string): Promise<ChangeEvent[]> {
       select id, site, change_type, confidence, reason, title, summary, area_km2,
         to_char(onset, 'YYYY-MM-DD') as onset, to_char(peak, 'YYYY-MM-DD') as peak,
         to_char(last_seen, 'YYYY-MM-DD') as last_seen, to_char(recovery, 'YYYY-MM-DD') as recovery,
-        status, footprint_by_pass
+        status, footprint_by_pass, signature
       from events where site = ${id}
       order by area_km2 desc`;
   }
@@ -69,6 +69,7 @@ export async function siteEvents(id: string): Promise<ChangeEvent[]> {
       recovery: e.recovery,
       status: e.status,
       footprint_by_pass: e.footprint_by_pass,
+      signature: e.signature,
     }))
     .sort((a, b) => b.area_km2 - a.area_km2);
 }

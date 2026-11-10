@@ -14,6 +14,8 @@ export type SiteSummary = {
 
 export type Footprint = { pass_id: string; date: string; area_km2: number; geometry: MultiPolygon };
 
+export type Signature = { dates: string[]; d_hh: number[]; d_hv: number[]; fraction: number[] };
+
 export type EventStatus = "growing" | "stable" | "receding" | "recovered";
 
 export type ChangeEvent = {
@@ -31,6 +33,7 @@ export type ChangeEvent = {
   recovery: string | null;
   status: EventStatus;
   footprint_by_pass: Footprint[];
+  signature: Signature;
 };
 
 export type RadarManifest = {

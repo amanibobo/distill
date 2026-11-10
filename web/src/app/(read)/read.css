@@ -1,13 +1,7 @@
 .read {
-  --ground: #fafaf8;
-  --ink: #111;
-  --ink-2: rgb(0 0 0 / 0.72);
-  --ink-3: rgb(0 0 0 / 0.45);
-  --rule: rgb(0 0 0 / 0.07);
-  --nasa-blue: #0b3d91;
-  --nasa-red: #d8321a;
-  --hl-blue: rgb(11 61 145 / 0.14);
-  --hl-red: rgb(252 61 33 / 0.16);
+  --rule: var(--line);
+  --hl-blue: rgb(47 123 246 / 0.14);
+  --hl-red: rgb(252 61 33 / 0.14);
   min-height: 100dvh;
   display: flex;
   flex-direction: column;
@@ -38,11 +32,10 @@
   display: inline-flex;
   align-items: center;
   gap: 12px;
-  font-family: var(--font-mono);
-  font-size: 28px;
-  font-weight: 500;
+  font-size: 24px;
+  font-weight: 400;
   line-height: 1.1;
-  letter-spacing: -0.04em;
+  letter-spacing: -0.01em;
   color: var(--ink);
   text-decoration: none;
 }
@@ -53,50 +46,12 @@
   color: var(--nasa-blue);
 }
 
-.nav {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0 10px;
-  margin-top: 14px;
-  font-size: 13px;
-  color: var(--ink-3);
-}
-
-.nav-item {
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.nav a {
-  display: inline-flex;
-  min-height: 44px;
-  align-items: center;
-  color: var(--ink-3);
-  text-decoration: underline;
-  text-decoration-thickness: 1px;
-  text-decoration-color: rgb(0 0 0 / 0.25);
-  text-underline-offset: 0.25em;
-  transition: color 120ms ease;
-}
-
-.nav a:hover,
-.nav a[aria-current="page"] {
-  color: var(--ink);
-}
-
-.nav a.nav-primary {
-  color: var(--nasa-blue);
-  text-decoration-color: rgb(11 61 145 / 0.45);
-}
-
 .read-main {
   flex: 1;
   padding: 8px 0 64px;
-  font-size: 14px;
-  line-height: 1.75;
-  color: rgb(0 0 0 / 0.82);
+  font-size: 16px;
+  line-height: 1.7;
+  color: var(--ink);
 }
 
 .lede {
@@ -111,8 +66,7 @@
 
 .label {
   margin: 0 0 22px;
-  font-family: var(--font-mono);
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 400;
   color: var(--ink-3);
 }
@@ -123,8 +77,8 @@
 
 .read-main h3 {
   margin: 36px 0 10px;
-  font-size: 14px;
-  font-weight: 500;
+  font-size: 16px;
+  font-weight: 400;
   color: var(--ink);
 }
 
@@ -137,11 +91,12 @@
 .mono,
 .read-main code {
   font-family: var(--font-mono);
+  font-size: 0.86em;
   color: var(--ink);
 }
 
 .ink-blue {
-  color: var(--nasa-blue);
+  color: var(--select);
 }
 
 .ink-red {
@@ -271,4 +226,8 @@
   padding: 10px 0 14px;
   font-size: 12px;
   color: var(--ink-3);
+}
+
+.read-head nav {
+  margin-left: -11px;
 }

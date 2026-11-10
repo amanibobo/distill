@@ -1,6 +1,14 @@
 "use client";
 
-import { Map as MapLibre, setWorkerUrl, type GeoJSONSource, type ImageSource, type MapGeoJSONFeature } from "maplibre-gl";
+import {
+  Map as MapLibre,
+  NavigationControl,
+  ScaleControl,
+  setWorkerUrl,
+  type GeoJSONSource,
+  type ImageSource,
+  type MapGeoJSONFeature,
+} from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 import { useEffect, useRef, useState } from "react";
 import type { FeatureCollection, MultiPolygon, Point } from "geojson";
@@ -9,25 +17,30 @@ import styles from "./atlas.module.css";
 
 setWorkerUrl("/maplibre-gl-worker.mjs");
 
-const BASEMAP = "https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json";
+const BASEMAP = "https://basemaps.cartocdn.com/gl/positron-gl-style/style.json";
 const EMPTY: FeatureCollection = { type: "FeatureCollection", features: [] };
 const BLANK_IMAGE = "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
 
 export type SitePoint = FeatureCollection<Point, { id: string; color: string; name: string }>;
 export type EventShapes = FeatureCollection<MultiPolygon, { id: string; type: string; color: string; title: string }>;
 export type Radar = { url: string; coordinates: [[number, number], [number, number], [number, number], [number, number]] } | null;
+export type Focus = { bbox: [number, number, number, number]; key: string; maxZoom?: number };
 
 type Props = {
   sites: SitePoint;
   shapes: EventShapes;
   radar: Radar;
-  radarVisible: boolean;
+  radarOpacity: number;
   selectedId: string | null;
-  focus: { bbox: [number, number, number, number]; key: string } | null;
+  hoveredId: string | null;
+  focus: Focus | null;
   initialCamera: Camera | null;
+  rightInset: number;
   onSite: (id: string) => void;
   onEvent: (id: string | null) => void;
+  onHover: (id: string | null) => void;
   onCamera: (c: Camera) => void;
+  onCursor: (lngLat: [number, number] | null) => void;
 };
 
 export function MapView(props: Props) {
@@ -54,6 +67,8 @@ export function MapView(props: Props) {
       dragRotate: false,
     });
     mapRef.current = map;
+    map.addControl(new NavigationControl({ showCompass: false }), "top-left");
+    map.addControl(new ScaleControl({ unit: "metric", maxWidth: 110 }), "bottom-left");
 
     map.on("style.load", () => {
       map.addSource("radar", { type: "image", url: BLANK_IMAGE, coordinates: [[0, 1], [1, 1], [1, 0], [0, 0]] });
@@ -65,7 +80,7 @@ export function MapView(props: Props) {
         source: "events",
         paint: {
           "fill-color": ["get", "color"],
-          "fill-opacity": ["case", ["boolean", ["feature-state", "selected"], false], 0.6, ["boolean", ["feature-state", "hover"], false], 0.48, 0.3],
+          "fill-opacity": ["case", ["boolean", ["feature-state", "selected"], false], 0.55, ["boolean", ["feature-state", "hover"], false], 0.45, 0.3],
         },
       });
       map.addLayer({
@@ -73,53 +88,49 @@ export function MapView(props: Props) {
         type: "line",
         source: "events",
         paint: {
-          "line-color": ["get", "color"],
-          "line-width": ["case", ["boolean", ["feature-state", "selected"], false], 2.2, 1],
-          "line-opacity": 0.9,
+          "line-color": ["case", ["boolean", ["feature-state", "selected"], false], "#2f7bf6", ["get", "color"]],
+          "line-width": ["case", ["boolean", ["feature-state", "selected"], false], 2, ["boolean", ["feature-state", "hover"], false], 1.5, 1],
+          "line-opacity": 0.95,
         },
       });
       map.addSource("sites", { type: "geojson", data: EMPTY });
       map.addLayer({
-        id: "site-glow",
+        id: "site-ring",
         type: "circle",
         source: "sites",
         maxzoom: 7,
-        paint: { "circle-radius": 22, "circle-color": ["get", "color"], "circle-blur": 1, "circle-opacity": 0.45 },
+        paint: { "circle-radius": 11, "circle-color": "rgba(0,0,0,0)", "circle-stroke-width": 1, "circle-stroke-color": ["get", "color"], "circle-stroke-opacity": 0.6 },
       });
       map.addLayer({
         id: "site-dot",
         type: "circle",
         source: "sites",
         maxzoom: 7,
-        paint: { "circle-radius": 4.5, "circle-color": ["get", "color"], "circle-stroke-width": 1.5, "circle-stroke-color": "#0b0c0e" },
+        paint: { "circle-radius": 4.5, "circle-color": ["get", "color"], "circle-stroke-width": 1.5, "circle-stroke-color": "#ffffff" },
       });
       setReady(true);
     });
 
-    let hovered: string | null = null;
-    const setHover = (id: string | null) => {
-      if (hovered) map.setFeatureState({ source: "events", id: hovered }, { hover: false });
-      hovered = id;
-      if (id) map.setFeatureState({ source: "events", id }, { hover: true });
+    const hit = (point: { x: number; y: number }) => {
+      const found = map.queryRenderedFeatures([point.x, point.y], { layers: ["event-fill", "site-dot", "site-ring"] }) as MapGeoJSONFeature[];
+      return { ev: found.find((f) => f.layer.id === "event-fill"), site: found.find((f) => f.layer.id !== "event-fill") };
     };
 
     map.on("mousemove", (e) => {
-      const hit = map.queryRenderedFeatures(e.point, { layers: ["event-fill", "site-dot", "site-glow"] }) as MapGeoJSONFeature[];
-      const ev = hit.find((f) => f.layer.id === "event-fill");
-      const site = hit.find((f) => f.layer.id !== "event-fill");
-      setHover(ev ? String(ev.properties.id) : null);
+      const { ev, site } = hit(e.point);
+      handlers.current.onHover(ev ? String(ev.properties.id) : null);
+      handlers.current.onCursor([e.lngLat.lng, e.lngLat.lat]);
       map.getCanvas().style.cursor = ev || site ? "pointer" : "";
       const text = ev ? String(ev.properties.title) : site ? String(site.properties.name) : null;
       setTip(text ? { x: e.point.x, y: e.point.y, text } : null);
     });
     map.on("mouseout", () => {
-      setHover(null);
+      handlers.current.onHover(null);
+      handlers.current.onCursor(null);
       setTip(null);
     });
     map.on("click", (e) => {
-      const hit = map.queryRenderedFeatures(e.point, { layers: ["event-fill", "site-dot", "site-glow"] }) as MapGeoJSONFeature[];
-      const ev = hit.find((f) => f.layer.id === "event-fill");
-      const site = hit.find((f) => f.layer.id !== "event-fill");
+      const { ev, site } = hit(e.point);
       if (ev) handlers.current.onEvent(String(ev.properties.id));
       else if (site) handlers.current.onSite(String(site.properties.id));
       else handlers.current.onEvent(null);
@@ -159,11 +170,21 @@ export function MapView(props: Props) {
 
   useEffect(() => {
     const map = mapRef.current;
+    if (!ready || !map || !props.hoveredId) return;
+    const id = props.hoveredId;
+    map.setFeatureState({ source: "events", id }, { hover: true });
+    return () => {
+      if (map.getSource("events")) map.setFeatureState({ source: "events", id }, { hover: false });
+    };
+  }, [ready, props.hoveredId, props.shapes]);
+
+  useEffect(() => {
+    const map = mapRef.current;
     if (!ready || !map) return;
     const src = map.getSource("radar") as ImageSource | undefined;
     if (props.radar) src?.updateImage({ url: props.radar.url, coordinates: props.radar.coordinates });
-    map.setPaintProperty("radar", "raster-opacity", props.radar && props.radarVisible ? 0.42 : 0);
-  }, [ready, props.radar, props.radarVisible]);
+    map.setPaintProperty("radar", "raster-opacity", props.radar ? props.radarOpacity : 0);
+  }, [ready, props.radar, props.radarOpacity]);
 
   const focusKey = props.focus?.key;
   useEffect(() => {
@@ -175,7 +196,7 @@ export function MapView(props: Props) {
         [w, s],
         [e, n],
       ],
-      { padding: { top: 80, bottom: 150, left: 360, right: 80 }, duration: 1800, essential: true, maxZoom: 10 },
+      { padding: { top: 56, bottom: 56, left: 56, right: 56 + props.rightInset }, duration: 1600, essential: true, maxZoom: props.focus.maxZoom ?? 10 },
     );
     // Fly only when the focus target changes, not on every render of the same bbox.
     // eslint-disable-next-line react-hooks/exhaustive-deps

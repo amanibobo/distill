@@ -99,3 +99,15 @@ These supersede earlier choices:
 - **Typeface.** Geist Mono everywhere: the reading pages, the map UI, the wordmark, and the panel titles. This replaces Geist and the serif wordmark. The hand-drawn diagrams keep the Excalidraw Virgil font.
 - **Accents.** NASA blue (#0b3d91) and NASA red (#fc3d21). The pixel droplet logo is NASA blue with one red cell on the reading pages, and light ink with the red cell on the dark map. Links and most marker highlights use blue, and red is used sparingly. The change-type colors on the map stay as they are, because they encode data.
 - **Map.** A flat Web Mercator map replaces the globe, and the idle spin is gone. The opening view frames all sites.
+
+## 2026-11-10 — Quiet light tool style, Geist Sans
+
+This supersedes the dark map, Geist Mono, and NASA-blue accents for chrome. It follows a style reference the user supplied:
+
+- **Surfaces.** Off-white #f7f7f7, white raised controls, 1px #e6e6e6 hairlines. Text is #2b2b2b, #6f6f6f, and #a3a3a3, and hovered rows are #efefef.
+- **Type.** Geist Sans at weight 400, with hierarchy from size and grey level. Geist Mono only for coordinates.
+- **Shape.** The map sits in a white card with a 20px radius. Controls and key caps use 8px, and rows 10px. Shadows are almost absent.
+- **Accent.** Blue #2f7bf6 is used only for selection. The logo keeps NASA blue with one red cell.
+- **Icons.** Lucide line icons.
+- **Map layout.** Rail on the page surface (tab bar, section header, action-list rows with key caps). The card holds a toolbar (pass stepper, a location field, Radar and Share buttons), the map on a CARTO Positron basemap, the inspector as an in-card column, and the timeline below a hairline. Shortcut keys flash a black toast.
+- **Change colors.** Stepped for the light surface: flood #2a78d6, fire scar #eb6834, harvest #1baf7a. These pass all-pairs color-blindness checks. Orange and green are under 3:1 contrast, so shapes keep outlines and every type is named in text.

@@ -1,5 +1,5 @@
-const day = new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "short", timeZone: "UTC" });
-const full = new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "short", year: "numeric", timeZone: "UTC" });
+const day = new Intl.DateTimeFormat("en-US", { day: "numeric", month: "short", timeZone: "UTC" });
+const full = new Intl.DateTimeFormat("en-US", { day: "numeric", month: "short", year: "numeric", timeZone: "UTC" });
 
 export const shortDate = (iso: string) => day.format(new Date(`${iso}T00:00:00Z`));
 export const longDate = (iso: string) => full.format(new Date(`${iso}T00:00:00Z`));
