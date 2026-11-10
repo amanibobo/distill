@@ -1,0 +1,88 @@
+[
+  {
+    "site": {
+      "id": "iowa",
+      "name": "Central Iowa harvest",
+      "place": "Story and Boone counties, Iowa, USA",
+      "bbox": [
+        -94.0,
+        41.85,
+        -93.2,
+        42.2
+      ],
+      "track": 4
+    },
+    "passes": 9,
+    "events": 21,
+    "types": {
+      "harvest": 13,
+      "flood": 3,
+      "other": 5
+    },
+    "scores": [
+      {
+        "type": "harvest",
+        "source": "USDA Cropland Data Layer 2021, corn and soybean fields",
+        "when": null,
+        "pixels": {
+          "precision": 0.908,
+          "recall": 0.93,
+          "iou": 0.85,
+          "predicted_km2": 1885.4,
+          "truth_km2": 1839.4
+        },
+        "events": {
+          "events_scored": 18,
+          "tp": 13,
+          "tn": 1,
+          "fp": 0,
+          "fn": 4,
+          "accuracy": 0.778
+        }
+      }
+    ]
+  },
+  {
+    "site": {
+      "id": "kaiser",
+      "name": "Kaiser Canyon Fire",
+      "place": "Colville Reservation, Washington, USA",
+      "bbox": [
+        -119.45,
+        48.0,
+        -118.65,
+        48.42
+      ],
+      "track": 71
+    },
+    "passes": 10,
+    "events": 111,
+    "types": {
+      "other": 73,
+      "fire_scar": 37,
+      "harvest": 1
+    },
+    "scores": [
+      {
+        "type": "fire_scar",
+        "source": "NIFC WFIGS final perimeter",
+        "when": null,
+        "pixels": {
+          "precision": 0.879,
+          "recall": 0.255,
+          "iou": 0.247,
+          "predicted_km2": 167.5,
+          "truth_km2": 576.8
+        },
+        "events": {
+          "events_scored": 108,
+          "tp": 32,
+          "tn": 65,
+          "fp": 5,
+          "fn": 6,
+          "accuracy": 0.898
+        }
+      }
+    ]
+  }
+]

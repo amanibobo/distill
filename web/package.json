@@ -14,9 +14,12 @@
     "next": "16.4.5",
     "postgres": "^4.1.0",
     "react": "19.3.0",
-    "react-dom": "19.3.0"
+    "react-dom": "19.3.0",
+    "roughjs": "^4.6.6",
+    "server-only": "^0.0.1"
   },
   "devDependencies": {
+    "@types/geojson": "^7946.0.16",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",

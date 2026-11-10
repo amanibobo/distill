@@ -91,21 +91,42 @@ def s1_new_water(cube: Cube, event_day: date, before_day: date) -> Truth:
     return Truth("flood", f"Sentinel-1 RTC new open water, {event_day} vs {before_day}", new, valid, event_day)
 
 
-def cdl_corn_soy(cube: Cube, year: int = 2025) -> Truth:
-    def build() -> np.ndarray:
-        w, s, e, n = grid_bounds_4326(cube.grid)
-        from pyproj import Transformer
+def _cropscape(grid: Grid, year: int) -> np.ndarray:
+    from pyproj import Transformer
 
-        to_albers = Transformer.from_crs(4326, 5070, always_xy=True)
-        xs, ys = to_albers.transform([w, e, w, e], [s, s, n, n])
-        r = requests.get(CDL, params={"year": year, "bbox": f"{min(xs)},{min(ys)},{max(xs)},{max(ys)}"}, timeout=120)
-        r.raise_for_status()
-        url = r.text.split("<returnURL>")[1].split("</returnURL>")[0]
-        cdl = warp(f"/vsicurl/{url}", cube.grid, Resampling.mode, dst_dtype="uint8", fill=0)
-        return cdl
+    w, s, e, n = grid_bounds_4326(grid)
+    xs, ys = Transformer.from_crs(4326, 5070, always_xy=True).transform([w, e, w, e], [s, s, n, n])
+    r = requests.get(CDL, params={"year": year, "bbox": f"{min(xs)},{min(ys)},{max(xs)},{max(ys)}"}, timeout=30)
+    r.raise_for_status()
+    url = r.text.split("<returnURL>")[1].split("</returnURL>")[0]
+    return warp(f"/vsicurl/{url}", grid, Resampling.mode, dst_dtype="uint8", fill=0)
 
-    cdl = _cached(cube.site.id, f"cdl_{year}", build)
-    return Truth("harvest", f"USDA Cropland Data Layer {year}, corn and soybeans", np.isin(cdl, [CORN, SOYBEANS]), cdl > 0, None)
+
+def _planetary_cdl(grid: Grid, year: int) -> np.ndarray:
+    cat = pystac_client.Client.open(STAC, modifier=planetary_computer.sign_inplace)
+    items = [it for it in cat.search(collections=["usda-cdl"], bbox=grid_bounds_4326(grid)).items() if it.id.startswith(f"cropland_{year}_")]
+    if not items:
+        raise RuntimeError(f"no CDL {year} on Planetary Computer")
+    out = np.zeros((grid.rows, grid.cols), np.uint8)
+    for it in items:
+        part = warp(it.assets["cropland"].href, grid, Resampling.mode, dst_dtype="uint8", fill=0)
+        out = np.where(out == 0, part, out)
+    return out
+
+
+def cdl_corn_soy(cube: Cube) -> Truth:
+    """Corn and soybean fields. Iowa fields rotate between the two, so the union is stable across years."""
+    for year, fetch in ((2025, _cropscape), (2021, _planetary_cdl)):
+        path = CACHE / cube.site.id / f"truth_cdl_{year}.npy"
+        if not path.exists():
+            try:
+                np.save(path, fetch(cube.grid, year))
+            except Exception as err:
+                print(f"  CDL {year} unavailable: {err!r}", flush=True)
+                continue
+        cdl = np.load(path)
+        return Truth("harvest", f"USDA Cropland Data Layer {year}, corn and soybean fields", np.isin(cdl, [CORN, SOYBEANS]), cdl > 0, None)
+    raise RuntimeError("no Cropland Data Layer source reachable")
 
 
 def site_truth(cube: Cube) -> list[Truth]:
