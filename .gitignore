@@ -8,3 +8,4 @@ pipeline/cache/
 *.h5
 .DS_Store
 *.log
+.next-build/
