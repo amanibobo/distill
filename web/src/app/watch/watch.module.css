@@ -1,0 +1,162 @@
+.form {
+  display: flex;
+  gap: 6px;
+  margin: 16px 0 0;
+}
+
+.input {
+  flex: 1;
+  min-width: 0;
+  height: 34px;
+  padding: 0 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--raised);
+  color: var(--ink);
+  font: inherit;
+  outline: none;
+}
+
+.input:focus {
+  border-color: var(--select);
+  box-shadow: 0 0 0 3px var(--select-tint);
+}
+
+.input::placeholder {
+  color: var(--ink-3);
+}
+
+.primary {
+  height: 34px;
+  padding: 0 14px;
+  border: 0;
+  border-radius: 8px;
+  background: #111;
+  color: #fff;
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.primary:disabled {
+  background: var(--hover);
+  color: var(--ink-3);
+  cursor: default;
+}
+
+.replay {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 34px;
+  margin: 16px 0 0;
+  padding: 0 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--raised);
+  color: var(--ink);
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.05);
+}
+
+.replay:hover {
+  background: var(--hover);
+}
+
+.error {
+  margin: 10px 0 0;
+  color: #c2410c;
+  font-size: 13px;
+}
+
+.feed {
+  flex: 1 1 0;
+  margin-top: 6px;
+}
+
+.alert {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 10px;
+  border-radius: 10px;
+  background: var(--raised);
+  box-shadow: inset 0 0 0 1px var(--line);
+  animation: slide 260ms ease-out;
+}
+
+.alertText {
+  color: var(--ink);
+  line-height: 1.4;
+}
+
+.quiet {
+  display: flex;
+  gap: 10px;
+  padding: 6px 10px;
+  color: var(--ink-3);
+  font-size: 13px;
+  animation: slide 260ms ease-out;
+}
+
+.quietDate {
+  min-width: 44px;
+  font-variant-numeric: tabular-nums;
+}
+
+.toast {
+  position: absolute;
+  top: 16px;
+  left: 50%;
+  padding: 8px 14px;
+  border-radius: 999px;
+  background: #111;
+  color: #fff;
+  font-size: 13px;
+  white-space: nowrap;
+  pointer-events: none;
+  box-shadow: 0 6px 20px rgb(0 0 0 / 0.16);
+  animation: toast 1800ms ease-out forwards;
+  z-index: 4;
+}
+
+.drawHint {
+  position: absolute;
+  top: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 6px 12px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--raised);
+  color: var(--ink-2);
+  font-size: 13px;
+  white-space: nowrap;
+  pointer-events: none;
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.05);
+}
+
+@keyframes slide {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+}
+
+@keyframes toast {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -4px);
+  }
+  12%,
+  80% {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, 0);
+  }
+}
