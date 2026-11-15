@@ -111,3 +111,15 @@ This supersedes the dark map, Geist Mono, and NASA-blue accents for chrome. It f
 - **Icons.** Lucide line icons.
 - **Map layout.** Rail on the page surface (tab bar, section header, action-list rows with key caps). The card holds a toolbar (pass stepper, a location field, Radar and Share buttons), the map on a CARTO Positron basemap, the inspector as an in-card column, and the timeline below a hairline. Shortcut keys flash a black toast.
 - **Change colors.** Stepped for the light surface: flood #2a78d6, fire scar #eb6834, harvest #1baf7a. These pass all-pairs color-blindness checks. Orange and green are under 3:1 contrast, so shapes keep outlines and every type is named in text.
+
+## 2026-11-15 — Assam: crop growth type, matched reference window
+
+Assam is mostly rice farmland, and July to October is rice season. Most change there is paddies brightening as rice grows. A new type, **crop growth**, covers cropland that brightens in the growing season and stays bright, and fields that go dark, drain and then green, which is planting water. It shares harvest's green as one agriculture family and is drawn hatched, because no fourth hue passed the all-pairs color-blindness check against fire orange.
+
+The flood rule now needs both polarizations darker by 3 dB (was 5) and the area back to normal. Water on fields that drains and then greens by 3 dB or more is labeled a flood at 0.4 confidence, and its reason says it may be planting water. Radar passes 12 days apart cannot tell the two apart. **This rule was revised after seeing that most Sentinel-1 flood pixels fell in events the planting rule had claimed, so the Assam score is not an independent check.** The Sentinel-1 reference now compares against 16 June, matching NISAR's baseline window (it was 15 July). Even so, Assam flood recall is about 5%. The honest limit is that most flood water at 40 m shows as less than a 3 dB drop and then greens.
+
+Unexplained "other" events get a template caption instead of a Claude call, and the map hides them by default.
+
+## 2026-11-15 — Process page removed; remaining layers built in parallel
+
+The Process tab and page are gone at the user's request. The tabs are now Map, Watch, Explore and Writeup. Search, Watch (areas and replayed alerts), Explore (3D GUNW deformation), find more like this (pgvector embeddings), the radar versus optical slider, and the submission text are being built by parallel agents. Each one owns separate files.
