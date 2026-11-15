@@ -4,6 +4,7 @@ import numpy as np
 from affine import Affine
 from pyproj import Transformer
 from rasterio.features import shapes
+import shapely
 from shapely.geometry import MultiPolygon, mapping, shape
 from shapely.ops import transform, unary_union
 
@@ -17,13 +18,14 @@ def polygon(mask: np.ndarray, e: Event, cube: Cube, to_wgs84) -> MultiPolygon:
     window_transform = cube.grid.transform * Affine.translation(e.window[1].start, e.window[0].start)
     parts = [shape(g) for g, v in shapes(mask.astype(np.uint8), mask=mask, transform=window_transform) if v == 1]
     geom = unary_union(parts).simplify(cube.grid.res, preserve_topology=True).buffer(0)
-    geom = transform(to_wgs84, geom)
+    geom = shapely.set_precision(transform(to_wgs84, geom), 1e-5)
     if geom.geom_type == "Polygon":
         geom = MultiPolygon([geom])
     return geom
 
 
 def features(e: Event, cover: dict[str, float]) -> Features:
+    after = e.d_hh[e.recovery :] if e.recovery is not None else None
     return Features(
         direction=e.direction.value,
         peak_d_hh=round(float(e.d_hh[e.peak]), 2),
@@ -34,6 +36,7 @@ def features(e: Event, cover: dict[str, float]) -> Features:
         growth_passes=e.growth_passes,
         peak_area_km2=e.peak_area_km2,
         cover=cover,
+        after_d_hh=round(float(np.mean(after)), 2) if after is not None and len(after) else None,
     )
 
 

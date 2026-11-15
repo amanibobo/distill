@@ -87,7 +87,7 @@ def s1_new_water(cube: Cube, event_day: date, before_day: date) -> Truth:
         new = (during < S1_WATER_DB) & (before >= S1_WATER_DB) & valid
         return np.stack([new, valid])
 
-    new, valid = _cached(cube.site.id, f"s1_{event_day}", build)
+    new, valid = _cached(cube.site.id, f"s1_{event_day}_vs_{before_day}", build)
     return Truth("flood", f"Sentinel-1 RTC new open water, {event_day} vs {before_day}", new, valid, event_day)
 
 
@@ -134,8 +134,8 @@ def site_truth(cube: Cube) -> list[Truth]:
         return [nifc_perimeter(cube, "Kaiser Canyon")]
     if cube.site.id == "assam":
         return [
-            s1_new_water(cube, date(2026, 7, 22), date(2026, 7, 15)),
-            s1_new_water(cube, date(2026, 8, 15), date(2026, 7, 15)),
+            s1_new_water(cube, date(2026, 7, 22), date(2026, 6, 16)),
+            s1_new_water(cube, date(2026, 8, 15), date(2026, 6, 16)),
         ]
     if cube.site.id == "iowa":
         return [cdl_corn_soy(cube)]

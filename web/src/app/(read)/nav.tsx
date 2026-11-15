@@ -5,6 +5,5 @@ import { Tabs } from "../map/rail";
 
 export function Nav() {
   const path = usePathname();
-  const current = path === "/writeup" ? "writeup" : path === "/process" ? "process" : null;
-  return <Tabs current={current} />;
+  return <Tabs current={path === "/writeup" ? "writeup" : null} />;
 }

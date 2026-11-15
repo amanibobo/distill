@@ -105,7 +105,9 @@ export function CubeSketch() {
 }
 
 const QUESTIONS = [
-  { q: ["Both polarizations darker by 5 dB or more,", "and back to normal soon?"], a: "Flood", fill: "blue" },
+  { q: ["Fields go dark, drain, then turn green?", "Deep water: low-confidence flood."], a: "Crop growth", fill: "green" },
+  { q: ["Both polarizations darker by 3 dB or more,", "and back to normal?"], a: "Flood", fill: "blue" },
+  { q: ["Cropland brightens in summer", "and stays bright?"], a: "Crop growth", fill: "green" },
   { q: ["Cross-polarized return falls on cropland,", "starts in autumn and stays low?"], a: "Harvest", fill: "green" },
   { q: ["Falls over vegetation, stays low,", "and grows or covers a large area?"], a: "Fire scar", fill: "orange" },
   { q: ["A small forest patch", "that stays low?"], a: "Deforestation", fill: "violet" },

@@ -1,12 +1,11 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { Label, Mono } from "@/components/prose";
 import accuracy from "@/data/accuracy.json";
 import { CubeSketch, FireSignalSketch, PipelineSketch, RulesSketch, ServingSketch } from "./diagrams";
 
 export const metadata: Metadata = { title: "Writeup · Distill" };
 
-const TYPE_LABEL: Record<string, string> = { flood: "Flood", fire_scar: "Fire scar", harvest: "Harvest" };
+const TYPE_LABEL: Record<string, string> = { flood: "Flood", fire_scar: "Fire scar", harvest: "Harvest", crop_growth: "Crop growth" };
 const fmt = (v: number | null) => (v === null ? "n/a" : v.toFixed(2));
 
 type Score = {
@@ -161,8 +160,8 @@ export default function Writeup() {
         </p>
         <p>
           Code: the pipeline is Python with <Mono>asf_search</Mono>, <Mono>h5py</Mono>, <Mono>scikit-image</Mono> and{" "}
-          <Mono>rasterio</Mono>. The app is Next.js and MapLibre. The decisions behind all of it are on the{" "}
-          <Link href="/process">process</Link> page.
+          <Mono>rasterio</Mono>. The app is Next.js and MapLibre, with events in Postgres and PostGIS. Every decision is logged in the{" "}
+          <a href="https://github.com/amanibobo/distill/blob/main/docs/decisions.md">decisions file</a>.
         </p>
       </section>
     </>

@@ -25,11 +25,39 @@ def test_open_water_that_recedes_is_flood():
     assert "returned to normal" in label.reason
 
 
-def test_flood_on_july_paddies_is_less_confident_than_on_grass():
-    grass = classify(features(peak_d_hh=-9, peak_d_hv=-8))
-    paddy = classify(features(peak_d_hh=-9, peak_d_hv=-8, cover={"crop": 0.9}))
-    assert paddy.type is ChangeType.flood
-    assert paddy.confidence < grass.confidence
+def test_moderate_open_water_that_recedes_is_flood():
+    label = classify(features(peak_d_hh=-3.4, peak_d_hv=-3.1, recovered=True, after_d_hh=0.2, cover={"crop": 0.8}))
+    assert label.type is ChangeType.flood
+
+
+def test_shallow_planting_water_that_greens_is_crop_growth():
+    label = classify(features(peak_d_hh=-2.5, peak_d_hv=-1.5, recovered=True, after_d_hh=4.5, cover={"crop": 0.9}))
+    assert label.type is ChangeType.crop_growth
+    assert "not a flood" in label.reason
+
+
+def test_deep_water_on_fields_that_green_is_a_low_confidence_flood_that_says_so():
+    label = classify(features(peak_d_hh=-6, peak_d_hv=-5, recovered=True, after_d_hh=4.5, cover={"crop": 0.9}))
+    assert label.type is ChangeType.flood
+    assert label.confidence < 0.5
+    assert "planting" in label.reason
+
+
+def test_greening_on_non_cropland_after_water_stays_flood():
+    label = classify(features(peak_d_hh=-6, peak_d_hv=-5, recovered=True, after_d_hh=4.5, cover={"grass": 0.9}))
+    assert label.type is ChangeType.flood
+
+
+def test_summer_cropland_that_brightens_and_stays_is_crop_growth():
+    label = classify(
+        features(direction="brighter", peak_d_hh=5.3, peak_d_hv=3.9, onset=date(2026, 7, 22), passes_active=9, recovered=False, cover={"crop": 0.85})
+    )
+    assert label.type is ChangeType.crop_growth
+
+
+def test_brief_brightening_under_crops_is_flooded_vegetation():
+    label = classify(features(direction="brighter", peak_d_hh=4.5, peak_d_hv=1, passes_active=1, recovered=True, cover={"crop": 0.7}))
+    assert label.type is ChangeType.flood
 
 
 def test_persistent_autumn_hv_drop_on_cropland_is_harvest():

@@ -21,6 +21,22 @@ const BASEMAP = "https://basemaps.cartocdn.com/gl/positron-gl-style/style.json";
 const EMPTY: FeatureCollection = { type: "FeatureCollection", features: [] };
 const BLANK_IMAGE = "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
 
+const HATCH_COLOR: [number, number, number] = [0x1b, 0xaf, 0x7a];
+
+// A diagonal hatch for crop growth, which shares harvest's green and is told apart by texture.
+function hatch([r, g, b]: [number, number, number]) {
+  const size = 12;
+  const data = new Uint8Array(size * size * 4);
+  for (let y = 0; y < size; y++) {
+    for (let x = 0; x < size; x++) {
+      const on = (x + y) % size < 3;
+      const i = (y * size + x) * 4;
+      data.set([r, g, b, on ? 255 : 46], i);
+    }
+  }
+  return { width: size, height: size, data };
+}
+
 export type SitePoint = FeatureCollection<Point, { id: string; color: string; name: string }>;
 export type EventShapes = FeatureCollection<MultiPolygon, { id: string; type: string; color: string; title: string }>;
 export type Radar = { url: string; coordinates: [[number, number], [number, number], [number, number], [number, number]] } | null;
@@ -74,10 +90,22 @@ export function MapView(props: Props) {
       map.addSource("radar", { type: "image", url: BLANK_IMAGE, coordinates: [[0, 1], [1, 1], [1, 0], [0, 0]] });
       map.addLayer({ id: "radar", type: "raster", source: "radar", paint: { "raster-opacity": 0, "raster-fade-duration": 0 } });
       map.addSource("events", { type: "geojson", data: EMPTY, promoteId: "id" });
+      map.addImage("hatch", hatch(HATCH_COLOR), { pixelRatio: 2 });
+      map.addLayer({
+        id: "event-hatch",
+        type: "fill",
+        source: "events",
+        filter: ["==", ["get", "type"], "crop_growth"],
+        paint: {
+          "fill-pattern": "hatch",
+          "fill-opacity": ["case", ["boolean", ["feature-state", "selected"], false], 1, ["boolean", ["feature-state", "hover"], false], 0.9, 0.7],
+        },
+      });
       map.addLayer({
         id: "event-fill",
         type: "fill",
         source: "events",
+        filter: ["!=", ["get", "type"], "crop_growth"],
         paint: {
           "fill-color": ["get", "color"],
           "fill-opacity": ["case", ["boolean", ["feature-state", "selected"], false], 0.55, ["boolean", ["feature-state", "hover"], false], 0.45, 0.3],
@@ -112,8 +140,9 @@ export function MapView(props: Props) {
     });
 
     const hit = (point: { x: number; y: number }) => {
-      const found = map.queryRenderedFeatures([point.x, point.y], { layers: ["event-fill", "site-dot", "site-ring"] }) as MapGeoJSONFeature[];
-      return { ev: found.find((f) => f.layer.id === "event-fill"), site: found.find((f) => f.layer.id !== "event-fill") };
+      const found = map.queryRenderedFeatures([point.x, point.y], { layers: ["event-fill", "event-hatch", "site-dot", "site-ring"] }) as MapGeoJSONFeature[];
+      const isEvent = (f: MapGeoJSONFeature) => f.layer.id === "event-fill" || f.layer.id === "event-hatch";
+      return { ev: found.find(isEvent), site: found.find((f) => !isEvent(f)) };
     };
 
     map.on("mousemove", (e) => {

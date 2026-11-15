@@ -2,7 +2,7 @@
 
 import { Pause, Play } from "lucide-react";
 import { useState } from "react";
-import { CHANGE_TYPES, type ChangeType } from "@/lib/change-types";
+import { CHANGE_TYPES, isHatched, swatch, type ChangeType } from "@/lib/change-types";
 import { area, longDate, shortDate } from "@/lib/format";
 import type { Pass } from "@/lib/types";
 import styles from "./atlas.module.css";
@@ -50,7 +50,7 @@ export function Timeline({ passes, activity, current, playing, onPass, onPlay }:
           {shown && shown.total > 0 ? (
             shown.byType.map(([t, km2]) => (
               <span key={t} className={styles.timeStat}>
-                <span className={styles.dot} style={{ background: CHANGE_TYPES[t].color }} aria-hidden />
+                <span className={styles.dot} style={{ background: swatch(t) }} aria-hidden />
                 {CHANGE_TYPES[t].label}
                 <b>{area(km2)}</b>
               </span>
@@ -66,6 +66,14 @@ export function Timeline({ passes, activity, current, playing, onPass, onPlay }:
         </span>
       </div>
 
+      <svg width="0" height="0" aria-hidden style={{ position: "absolute" }}>
+        <defs>
+          <pattern id="hatch" width="4" height="4" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+            <rect width="4" height="4" fill="#1baf7a" opacity="0.25" />
+            <rect width="1.6" height="4" fill="#1baf7a" />
+          </pattern>
+        </defs>
+      </svg>
       <div className={styles.strip} style={{ height: STRIP_H + 22 }} onMouseLeave={() => setHover(null)}>
         {lastBaseline >= 0 && (
           <div className={styles.baselineBand} style={{ left: 0, width: `${(pos(passes[lastBaseline].date) + pos(passes[Math.min(lastBaseline + 1, passes.length - 1)].date)) / 2}%` }}>
@@ -93,7 +101,7 @@ export function Timeline({ passes, activity, current, playing, onPass, onPlay }:
                 {a?.byType.map(([t, km2]) => {
                   const h = Math.max((km2 / max) * (STRIP_H - 4), 1.5);
                   y -= h;
-                  const rect = <rect key={t} x={2} y={y} width={10} height={Math.max(h - 1.5, 1)} rx={1.5} fill={CHANGE_TYPES[t].color} />;
+                  const rect = <rect key={t} x={2} y={y} width={10} height={Math.max(h - 1.5, 1)} rx={1.5} fill={isHatched(t) ? "url(#hatch)" : CHANGE_TYPES[t].color} />;
                   y -= 0.5;
                   return rect;
                 })}

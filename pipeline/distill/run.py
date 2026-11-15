@@ -107,9 +107,17 @@ def run_site(site_id: str, captions: bool) -> dict:
     scores = score(cube, built, site_truth(cube))
     records = [r for r, _, _ in built]
     if captions:
-        caps = caption_events([caption_payload(site, r) for r in records], CACHE / site_id / "captions.json")
-        for r, c in zip(records, caps):
+        explained = [r for r in records if r["change_type"] != "other"]
+        caps = caption_events([caption_payload(site, r) for r in explained], CACHE / site_id / "captions.json")
+        for r, c in zip(explained, caps):
             r["title"], r["summary"] = c.title, c.summary
+        for r in records:
+            if r["change_type"] == "other":
+                r["title"] = f"Unexplained change near {site.place.split(',')[0]}"
+                r["summary"] = (
+                    f"The radar saw the surface {r['direction']} here from {r['onset']}, over about {r['area_km2']:.1f} km², "
+                    "but the pattern does not match a change type Distill can name with confidence."
+                )
     manifest = write_overlays(cube, WEB_RADAR / site_id)
     w, s, e, n = site.bbox
     payload = {
