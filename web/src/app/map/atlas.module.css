@@ -1002,3 +1002,9 @@
 .rowCompact {
   min-height: 38px;
 }
+
+.provenance {
+  margin: 6px 0 0;
+  color: var(--ink-3);
+  font-size: 12px;
+}

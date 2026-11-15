@@ -1,10 +1,11 @@
 "use client";
 
-import { X } from "lucide-react";
+import { ScanSearch, X } from "lucide-react";
 import { useState } from "react";
-import { CHANGE_TYPES } from "@/lib/change-types";
+import { CHANGE_TYPES, swatch } from "@/lib/change-types";
 import { area, longDate, percent, shortDate } from "@/lib/format";
 import type { ChangeEvent, EventStatus, Pass } from "@/lib/types";
+import type { SimilarEvent } from "../api/similar/[id]/route";
 import styles from "./atlas.module.css";
 
 const STATUS: Record<EventStatus, string> = {
@@ -120,6 +121,68 @@ function SignatureChart({ passes, current, onPick, event }: ChartProps & { event
   );
 }
 
+type Search = { state: "idle" } | { state: "loading" } | { state: "done"; rows: SimilarEvent[] } | { state: "failed"; message: string };
+
+function LikeThis({ event }: { event: ChangeEvent }) {
+  const [search, setSearch] = useState<Search>({ state: "idle" });
+
+  async function find() {
+    setSearch({ state: "loading" });
+    try {
+      const res = await fetch(`/api/similar/${encodeURIComponent(event.id)}`);
+      const body = await res.json();
+      setSearch(res.ok ? { state: "done", rows: body } : { state: "failed", message: body.error ?? "The search failed." });
+    } catch {
+      setSearch({ state: "failed", message: "Couldn't reach the server." });
+    }
+  }
+
+  return (
+    <section className={styles.why}>
+      <h3>Changes like this</h3>
+      {search.state === "idle" || search.state === "loading" ? (
+        <>
+          <p>Events at any site where the radar signature changed the same way.</p>
+          <button className={styles.ghost} style={{ margin: "8px 0 0 -10px" }} onClick={find} disabled={search.state === "loading"}>
+            <ScanSearch className={styles.icon} aria-hidden />
+            {search.state === "loading" ? "Searching every site" : "Find similar"}
+          </button>
+        </>
+      ) : search.state === "failed" ? (
+        <p>{search.message}</p>
+      ) : search.rows.length === 0 ? (
+        <p>Nothing else in the data changed this way.</p>
+      ) : (
+        <ul className={styles.list} style={{ margin: "8px -10px 0" }}>
+          {search.rows.map((r) => (
+            <li key={r.id}>
+              <button
+                className={styles.row}
+                title={r.title ?? undefined}
+                onClick={() => {
+                  // eslint-disable-next-line @next/next/no-location-assign-relative-destination -- the map reads site and event from the URL only when it mounts
+                  window.location.href = `/map?site=${encodeURIComponent(r.site)}&event=${encodeURIComponent(r.id)}`;
+                }}
+              >
+                <span className={styles.dot} style={{ background: swatch(r.change_type) }} aria-hidden />
+                <span className={styles.rowText}>
+                  <span className={styles.rowLabel}>{r.title ?? CHANGE_TYPES[r.change_type].label}</span>
+                  <span className={styles.rowSub}>
+                    {r.site_name} · {CHANGE_TYPES[r.change_type].label}
+                  </span>
+                </span>
+                <span className={styles.rowTrail} title="How closely the radar signature matches">
+                  {percent(r.similarity)}
+                </span>
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+    </section>
+  );
+}
+
 type Props = { event: ChangeEvent; passes: Pass[]; current: string; onPick: (d: string) => void; onClose: () => void };
 
 export function Inspector({ event, passes, current, onPick, onClose }: Props) {
@@ -128,7 +191,7 @@ export function Inspector({ event, passes, current, onPick, onClose }: Props) {
     <aside className={styles.inspector} aria-label="Change details">
       <header className={styles.inspHead}>
         <span className={styles.typeLabel}>
-          <span className={styles.dot} style={{ background: t.color }} aria-hidden />
+          <span className={styles.dot} style={{ background: swatch(event.change_type) }} aria-hidden />
           {t.label}
         </span>
         <button className={styles.iconBtn} onClick={onClose} aria-label="Close details" title="Close">
@@ -145,6 +208,9 @@ export function Inspector({ event, passes, current, onPick, onClose }: Props) {
           <b>{percent(event.confidence)}</b>
         </div>
         {event.summary && <p className={styles.summary}>{event.summary}</p>}
+        {event.summary && event.change_type !== "other" && (
+          <p className={styles.provenance}>Summary written by Claude from the numbers below. The label comes from Distill&rsquo;s rules.</p>
+        )}
 
         <dl className={styles.metrics}>
           <div>
@@ -172,6 +238,7 @@ export function Inspector({ event, passes, current, onPick, onClose }: Props) {
           <h3>Why Distill labeled it this way</h3>
           <p>{event.reason}</p>
         </section>
+        <LikeThis key={event.id} event={event} />
         <p className={styles.eventId}>{event.id}</p>
       </div>
     </aside>

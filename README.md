@@ -19,6 +19,7 @@ cd pipeline
 uv run python -m distill.fetch           # stream and cache every site (resumable)
 uv run python -m distill.run             # detect, label, score, caption, export
 uv run python -m distill.load            # load out/*.json into Postgres (needs DATABASE_URL)
+uv run python -m distill.embed           # signature embeddings for find more like this (rerun after any load)
 uv run pytest
 
 cd ../web
