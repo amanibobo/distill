@@ -1,5 +1,7 @@
 import { ArrowRight, ArrowUpRight, BellRing, BookOpen, Code2, Map as MapIcon, Mountain } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
+import { RadarCompare } from "@/components/radar-compare";
 import { Highlights } from "@/components/highlights";
 import { LogoMark } from "@/components/logo";
 import accuracy from "@/data/accuracy.json";
@@ -71,18 +73,23 @@ export default function Home() {
         </div>
 
         <div className="hero-stage">
-          <img
-            className="hero-shot"
-            src="/landing/map-kaiser.jpg"
-            width={2880}
-            height={1720}
-            alt="The Distill map over the Kaiser Canyon Fire on September 23, 2026: burn scars outlined in orange over the radar image, a list of changes on the left, and the selected burn's details and area chart on the right."
-          />
+          <RadarCompare site="assam" />
         </div>
       </header>
 
       <div className="page">
         <main className="after-hero">
+          <section className="shot" aria-labelledby="the-map">
+            <h2 id="the-map">the map</h2>
+            <Image
+              className="hero-shot"
+              src="/landing/map-kaiser.jpg"
+              width={2880}
+              height={1720}
+              sizes="(min-width: 1120px) 1040px, 100vw"
+              alt="The Distill map over the Kaiser Canyon Fire on September 23, 2026: burn scars outlined in orange over the radar image, a list of changes on the left, and the selected burn's details and area chart on the right."
+            />
+          </section>
           <div className="grid">
             <section aria-labelledby="how">
               <h2 id="how">how it works</h2>

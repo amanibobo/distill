@@ -8,11 +8,11 @@ Pixel scores compare the area labeled with a type against the area the reference
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | Upper Assam floods | flood | Sentinel-1 RTC new open water, 2026-07-22 vs 2026-06-16 (2026-07-22) | 0.19 | 0.05 | 0.04 | 122 | 103 | 18 | 1 | 0.84 |
 | Upper Assam floods | flood | Sentinel-1 RTC new open water, 2026-08-15 vs 2026-06-16 (2026-08-15) | 0.01 | 0.00 | 0.00 | 286 | 270 | 7 | 9 | 0.94 |
-| Central Iowa harvest | harvest | USDA Cropland Data Layer 2021, corn and soybean fields | 0.91 | 0.93 | 0.85 | 18 | 14 | 4 | 0 | 0.78 |
+| Central Iowa harvest | harvest | USDA Cropland Data Layer 2021, corn and soybean fields | 0.91 | 0.93 | 0.85 | 27 | 16 | 11 | 0 | 0.59 |
 | Kaiser Canyon Fire | fire_scar | NIFC WFIGS final perimeter | 0.88 | 0.26 | 0.25 | 108 | 97 | 6 | 5 | 0.90 |
 
 ## Events by type
 
 - Upper Assam floods: 917 events over 12 passes, crop_growth 587, fire_scar 23, flood 25, harvest 18, other 264
-- Central Iowa harvest: 21 events over 9 passes, flood 3, harvest 13, other 5
+- Central Iowa harvest: 30 events over 10 passes, crop_growth 2, flood 8, harvest 15, other 5
 - Kaiser Canyon Fire: 111 events over 10 passes, fire_scar 37, harvest 1, other 73

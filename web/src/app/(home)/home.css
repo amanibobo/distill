@@ -295,7 +295,7 @@
 
 .hero-stage {
   width: 100%;
-  max-width: 1180px;
+  max-width: 1040px;
   margin: clamp(48px, 8vh, 88px) auto 0;
 }
 
@@ -308,6 +308,15 @@
 }
 
 /* Below the hero */
+
+.shot {
+  margin: 0 0 96px;
+}
+
+.shot .hero-shot {
+  margin-top: 20px;
+}
+
 
 .page {
   display: flex;

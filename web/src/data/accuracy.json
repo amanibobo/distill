@@ -77,11 +77,12 @@
       ],
       "track": 4
     },
-    "passes": 9,
-    "events": 21,
+    "passes": 10,
+    "events": 30,
     "types": {
-      "harvest": 13,
-      "flood": 3,
+      "harvest": 15,
+      "flood": 8,
+      "crop_growth": 2,
       "other": 5
     },
     "scores": [
@@ -90,19 +91,19 @@
         "source": "USDA Cropland Data Layer 2021, corn and soybean fields",
         "when": null,
         "pixels": {
-          "precision": 0.908,
-          "recall": 0.93,
+          "precision": 0.906,
+          "recall": 0.932,
           "iou": 0.85,
-          "predicted_km2": 1885.4,
+          "predicted_km2": 1892.3,
           "truth_km2": 1839.4
         },
         "events": {
-          "events_scored": 18,
-          "tp": 13,
+          "events_scored": 27,
+          "tp": 15,
           "tn": 1,
           "fp": 0,
-          "fn": 4,
-          "accuracy": 0.778
+          "fn": 11,
+          "accuracy": 0.593
         }
       }
     ]
