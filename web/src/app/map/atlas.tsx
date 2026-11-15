@@ -1,10 +1,11 @@
 "use client";
 
 import { ArrowLeft, ArrowRight, Layers, Link2, Pause, Play, Satellite } from "lucide-react";
-import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import type { Position } from "geojson";
 import { CHANGE_TYPES, type ChangeType } from "@/lib/change-types";
 import { longDate } from "@/lib/format";
+import type { SearchHit } from "@/lib/search";
 import type { ChangeEvent, RadarManifest, SiteSummary } from "@/lib/types";
 import { Inspector } from "./inspector";
 import { MapView, type EventShapes, type Focus, type Radar, type SitePoint } from "./map-view";
@@ -37,6 +38,8 @@ function eventBounds(e: ChangeEvent): [number, number, number, number] {
   return [w, s, east, n];
 }
 
+const eventFocus = (e: ChangeEvent): Focus => ({ bbox: eventBounds(e), key: `event:${e.id}:${Date.now()}`, maxZoom: 12 });
+
 function worldBox(sites: SiteSummary[]): [number, number, number, number] {
   const pad = 20;
   return [
@@ -64,6 +67,7 @@ export function Atlas() {
   const [camera, setCamera] = useState<Camera | null>(null);
   const [cursor, setCursor] = useState<[number, number] | null>(null);
   const [focus, setFocus] = useState<Focus | null>(null);
+  const pendingEvent = useRef<string | null>(null);
 
   const site = sites?.find((s) => s.id === siteId) ?? null;
   const passes = useMemo(() => site?.passes ?? [], [site]);
@@ -95,6 +99,13 @@ export function Atlas() {
       if (!live) return;
       setEvents(evs);
       setRadar(man);
+      const picked = evs.find((e) => e.id === pendingEvent.current);
+      pendingEvent.current = null;
+      if (picked) {
+        setSelected(picked.id);
+        setFocus(eventFocus(picked));
+        setPass(picked.peak);
+      }
     });
     return () => {
       live = false;
@@ -169,10 +180,19 @@ export function Atlas() {
       setSelected(id);
       const e = id ? events.find((x) => x.id === id) : null;
       if (!e) return;
-      if (fly) setFocus({ bbox: eventBounds(e), key: `event:${id}:${Date.now()}`, maxZoom: 12 });
+      if (fly) setFocus(eventFocus(e));
       if (current && !e.footprint_by_pass.some((f) => f.date === current)) setPass(e.peak);
     },
     [events, current],
+  );
+
+  const pickResult = useCallback(
+    (hit: SearchHit) => {
+      if (hit.site === siteId) return chooseEvent(hit.id, true);
+      chooseSite(hit.site);
+      pendingEvent.current = hit.id;
+    },
+    [siteId, chooseEvent, chooseSite],
   );
 
   const flash = useCallback((content: ReactNode) => setToast({ id: Date.now(), content }), []);
@@ -301,6 +321,7 @@ export function Atlas() {
         }
         onEvent={(id) => chooseEvent(id, true)}
         onHover={setHovered}
+        onResult={pickResult}
       />
 
       <main className={styles.card}>

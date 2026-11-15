@@ -1,6 +1,71 @@
 [
   {
     "site": {
+      "id": "assam",
+      "name": "Upper Assam floods",
+      "place": "Sivasagar and Jorhat, Assam, India",
+      "bbox": [
+        94.2,
+        26.6,
+        95.0,
+        27.5
+      ],
+      "track": 40
+    },
+    "passes": 12,
+    "events": 917,
+    "types": {
+      "crop_growth": 587,
+      "other": 264,
+      "flood": 25,
+      "fire_scar": 23,
+      "harvest": 18
+    },
+    "scores": [
+      {
+        "type": "flood",
+        "source": "Sentinel-1 RTC new open water, 2026-07-22 vs 2026-06-16",
+        "when": "2026-07-22",
+        "pixels": {
+          "precision": 0.193,
+          "recall": 0.053,
+          "iou": 0.043,
+          "predicted_km2": 71.0,
+          "truth_km2": 260.1
+        },
+        "events": {
+          "events_scored": 122,
+          "tp": 0,
+          "tn": 103,
+          "fp": 1,
+          "fn": 18,
+          "accuracy": 0.844
+        }
+      },
+      {
+        "type": "flood",
+        "source": "Sentinel-1 RTC new open water, 2026-08-15 vs 2026-06-16",
+        "when": "2026-08-15",
+        "pixels": {
+          "precision": 0.005,
+          "recall": 0.001,
+          "iou": 0.001,
+          "predicted_km2": 14.4,
+          "truth_km2": 105.5
+        },
+        "events": {
+          "events_scored": 286,
+          "tp": 0,
+          "tn": 270,
+          "fp": 9,
+          "fn": 7,
+          "accuracy": 0.944
+        }
+      }
+    ]
+  },
+  {
+    "site": {
       "id": "iowa",
       "name": "Central Iowa harvest",
       "place": "Story and Boone counties, Iowa, USA",
