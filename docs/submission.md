@@ -114,63 +114,63 @@ App (TypeScript):
 
 Hardware: one laptop. The pipeline runs locally, with no cloud compute.
 
-## Detailed project description, Devpost style (paste this one)
+## Project details (paste this one; answers the form's questions)
 
-Mark "[if it ships]" lines for removal if those features are not live at submission.
+Remove "[if it ships]" lines for features not live at submission.
 
-### Inspiration
+### What does it do, and how does it work?
 
-When a flood hits during the monsoon, or a wildfire burns under its own smoke, the satellite photos most maps use show clouds. Radar sees right through that. NASA and ISRO's new NISAR satellite has been imaging most of Earth every twelve days since June 2026, through cloud and at night. But to almost everyone, radar images look like static. We wanted anyone to be able to open a map, see what changed on the ground, and understand why.
+Distill turns radar from NASA and ISRO's NISAR satellite into a map of how Earth's surface is changing, one anyone can explore, search and trust.
 
-### What it does
+- Pick a place, press play, and watch changes appear pass by pass over the real radar image, colored by type: flood, fire scar, harvest, crop growth.
+- Click a change to see when it started, when it peaked, whether it's still going, how big it is, a confidence score, and a plain-English reason, such as "the canopy is gone and the patch grew over five passes."
+- Ask questions like "where did farmland flood since August?" The map shows the matches and the filter it understood, so you can correct it.
+- [if it ships] Draw a box around an area and get an alert when a new pass shows change.
+- [if it ships] See ground motion from the June 2026 Venezuela earthquakes in 3D.
+- [if it ships] Click any change and find places where the ground changed the same way.
 
-Distill turns NISAR radar into a map of surface change you can explore, search and trust.
+How it works:
 
-- **Change map:** pick a place, press play, and watch changes appear pass by pass over the real radar image. Each change is colored by type (flood, fire scar, harvest, crop growth).
-- **Every change explains itself:** click one to see when it started, when it peaked, whether it's still going, its area, a confidence score, and a plain-English reason, such as "the canopy is gone and the patch grew over five passes."
-- **Plain-English search:** ask "where did farmland flood since August?" and the map shows the matches, along with the filter it understood so you can correct it.
-- **[if it ships] Watch:** draw a box around an area you care about and get an alert whenever a new pass shows change. A replay mode steps through past passes.
-- **[if it ships] Explore:** see ground motion from the June 2026 Venezuela earthquakes in 3D, from NISAR interferometry draped over terrain.
-- **[if it ships] Find more like this:** click a change and find places where the ground changed the same way.
+- We stream only the slice of each 7 GB NISAR file that covers a site, straight from NASA's ASF archive, without downloading whole files.
+- We stack every pass into one block of place and time. A flood becomes a single event with a start, a peak and an end, instead of a pile of separate differences.
+- We correct each pass for rain and drying, then flag only change larger than the noise we measured before each event.
+- Readable rules label each change from how the radar's two polarizations moved, the land cover underneath, and the timing. Claude writes a short caption from the same numbers.
+- We score every label against independent maps: official fire perimeters, USDA crop maps, and Sentinel-1 water maps.
 
-It covers three real events so far: the Kaiser Canyon Fire in Washington, the harvest in central Iowa, and the monsoon floods in Upper Assam, India. That's 1,049 changes detected across 31 radar passes.
+It covers three real events: the Kaiser Canyon Fire in Washington, the central Iowa harvest, and the Upper Assam monsoon floods in India. That's 1,049 changes across 31 radar passes.
 
-### How we built it
+### What benefits does it have?
 
-- **Streaming instead of downloading.** Each NISAR file is about 7 GB, and our laptop had under 3 GB free. So we never download a file. We read only the slice of each file that covers a site, straight from NASA's ASF archive.
-- **Events, not snapshots.** Most radar tools compare two dates. We stack every pass into one block of place and time, so a flood becomes a single event with a start, a peak and an end, instead of a pile of separate differences.
-- **Measured noise, not guessed thresholds.** We correct each pass for rain and drying across the whole scene, then flag only change larger than the noise we measured between the pre-event passes.
-- **Labels you can check.** Instead of a black-box model, readable rules assign each type based on how the radar's two polarizations moved, the land cover underneath, and the timing. Claude writes the short caption from those same numbers.
-- **Scored against the truth.** We compare our labels with independent maps: official fire perimeters, USDA crop maps, and Sentinel-1 water maps.
+- It sees through clouds, smoke and darkness, exactly when optical satellites go blind during floods, fires and monsoons.
+- You don't need to know anything about radar. Every change is explained in plain words.
+- It's honest. Every label shows its reason and confidence, and we publish our accuracy scores, including the weak ones.
+- It's fast. The heavy processing happens once per site, so the map loads instantly and every view has a shareable link.
 
-Tools: Python (asf_search, earthaccess, h5py, xarray, scikit-image, rasterio), NASA Earthdata and ASF DAAC, Microsoft Planetary Computer, Supabase Postgres with PostGIS and pgvector, Next.js, MapLibre, react-three-fiber, and the Claude API.
+### What is the intended impact?
 
-### Results
+Disaster responders, farmers, insurers, journalists and students should all be able to see what's changing on the ground within days of a satellite pass, without a remote sensing degree. NISAR is brand new and its data is open, but almost nobody can read it yet. Distill is a step toward making it useful to everyone. We also plan to release our labeled events as the first open dataset of NISAR surface change, so researchers can build on it.
 
-- Kaiser Canyon Fire: 97 of 108 changes got the right label against the official fire perimeter. Precision is 0.88, but we only find about a quarter of the burned ground.
-- Iowa harvest: precision 0.91 and recall 0.93 against USDA crop fields.
-- Assam floods: weak. We catch only about 5% of the flooded area that Sentinel-1 shows.
+### What tools, coding languages, hardware or software did you use?
 
-### Challenges we ran into
+- **Languages:** Python and TypeScript.
+- **Data:** NISAR L2 GCOV from NASA's ASF DAAC through Earthdata; ESA WorldCover; Copernicus Sentinel-1 through Microsoft Planetary Computer; NIFC fire perimeters; USDA Cropland Data Layer.
+- **Processing:** asf_search, earthaccess, h5py, xarray, NumPy, SciPy, scikit-image, rasterio, Shapely.
+- **App:** Next.js, React, MapLibre GL, react-three-fiber, Supabase Postgres with PostGIS and pgvector.
+- **AI:** the Claude API, for event captions and plain-English search.
+- **Hardware:** one laptop. Everything ran on it, which is why we stream instead of download.
 
-- Our first fire run found only 6% of the burn. The signal was just about 1 dB, and a rainy pass shifted the whole scene. Measuring noise properly brought recall up to 26%.
-- In Assam, the biggest change is rice growing, not the flood. With passes twelve days apart, radar can't tell monsoon floodwater on a paddy from planting water. We added a crop growth type and labeled the ambiguous cases as low-confidence floods, with a reason that says so.
-- We caught our own mistake. The flood map we had planned to check Assam against turned out to be a flood in Spain.
+### How is the project creative?
 
-### Accomplishments we're proud of
+- **Change as events in space and time.** Most radar tools compare two dates. We treat the whole time series as one block, so every change has a lifecycle you can play back, and search can include time ("still growing", "since August").
+- **Labels that explain themselves.** Instead of a black-box classifier, every label carries the physical reason behind it, written so a non-expert can follow.
+- **Scoring in public.** We built honest accuracy checks into the product, not just the pitch.
 
-Everything runs on real NISAR data from the first months of its public release, and every number on the site comes from the pipeline. We publish our weak scores next to our strong ones.
+### What factors did the team consider?
 
-### What we learned
-
-L-band radar is great at seeing harvests and water through clouds. Over burned grassland or rice paddies, it's subtle, and twelve days between passes is a long time for a flash flood. Being honest about that made the product better.
-
-### What's next
-
-- More places, run planet-wide on cloud workers.
-- Adding interferometric coherence to catch more of each fire.
-- Email alerts for watched areas.
-- Releasing our labeled events as the first open dataset of NISAR surface change on Hugging Face.
+- **Honesty over polish.** L-band radar barely sees burned grass, so we only find about a quarter of the Kaiser Canyon burn (precision 0.88). In Assam, rice paddies flooded for planting look like floods, so flood detection there is weak, about 5% of the flooded area. We label those cases as uncertain and publish the scores, instead of hiding them. Iowa's harvest scores well: precision 0.91, recall 0.93.
+- **Tight constraints.** The machine had under 3 GB of free disk, and radar passes come every 12 days. Both shaped the design: stream the data, and reason over time.
+- **Accessibility.** Plain language everywhere, keyboard shortcuts, and colors checked for color blindness, with every type also named in text.
+- **Responsible AI.** Claude only writes captions and parses search questions, from numbers the pipeline computed. It never decides what changed, and we disclose where AI was used.
 
 ## Use of Super Intelligence (SI)
 
