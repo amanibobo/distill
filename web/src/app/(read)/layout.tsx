@@ -19,7 +19,7 @@ export default function ReadLayout({ children }: { children: ReactNode }) {
       </header>
       <main className="read-main">{children}</main>
       <footer className="read-foot">
-        <span>Distill, NASA Space Apps 2026</span>
+        <span>Distill, 2026</span>
         <span>NISAR data from the ASF DAAC</span>
       </footer>
     </div>
