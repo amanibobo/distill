@@ -16,6 +16,7 @@ import {
   RotateCcw,
   ScanSearch,
   Search,
+  Repeat,
   SkipBack,
   SkipForward,
   SquareDashed,
@@ -107,6 +108,7 @@ export function Atlas() {
   const [hidden, setHidden] = useState<Set<ChangeType>>(new Set(["other"]));
   const [playing, setPlaying] = useState(false);
   const [speed, setSpeed] = useState<1 | 2>(1);
+  const [loop, setLoop] = useState(false);
   const [radarOn, setRadarOn] = useState(true);
   const [toast, setToast] = useState<{ id: number; content: ReactNode } | null>(null);
   const [camera, setCamera] = useState<Camera | null>(null);
@@ -215,11 +217,12 @@ export function Atlas() {
     if (!playing || !current) return;
     const t = setTimeout(() => {
       const i = passes.findIndex((p) => p.date === current);
-      if (i >= passes.length - 1) setPlaying(false);
-      else setPass(passes[i + 1].date);
+      if (i < passes.length - 1) setPass(passes[i + 1].date);
+      else if (loop) setPass(passes.find((p) => !p.baseline)?.date ?? passes[0].date);
+      else setPlaying(false);
     }, PLAY_MS / speed);
     return () => clearTimeout(t);
-  }, [playing, current, passes, speed]);
+  }, [playing, current, passes, speed, loop]);
 
   const chooseSite = useCallback(
     (id: string) => {
@@ -553,6 +556,7 @@ export function Atlas() {
         <span className={styles.crumbSep}>/</span>
         <span className={styles.crumbMuted}>{crumb}</span>
         <span className={styles.topEnd}>
+          <CommandTrigger className={styles.ask} />
           <TourButton />
           <button className={ui.ghost} onClick={share} title="Copy a link to this view">
             <Link2 className={ui.icon} aria-hidden />
@@ -661,10 +665,6 @@ export function Atlas() {
                   Radar
                 </button>
               </span>
-            </div>
-
-            <div className={styles.tc}>
-              <CommandTrigger className={styles.ask} />
             </div>
 
             <div className={styles.tr}>
@@ -891,13 +891,27 @@ export function Atlas() {
           )}
         </section>
 
-        <section className={styles.dockCard} aria-label="Playback">
+        <section className={`${styles.dockCard} ${styles.player}`} aria-label="Playback">
           <div className={styles.dockHead}>
             Playback
-            <span className={styles.dockMeta}>{is3D ? "blend" : "space"}</span>
-            <button className={styles.speed} onClick={() => setSpeed((s) => (s === 1 ? 2 : 1))} disabled={is3D} title="Playback speed">
-              {speed}x
-            </button>
+            <span className={styles.seg} role="group" aria-label="Playback speed">
+              {([1, 2] as const).map((v) => (
+                <button key={v} className={styles.segBtn} aria-pressed={speed === v} onClick={() => setSpeed(v)} disabled={is3D}>
+                  {v}x
+                </button>
+              ))}
+            </span>
+          </div>
+          <div className={styles.pbInfo}>
+            <span className={styles.readoutMain}>{is3D ? `${Math.round(motion.blend * 100)}%` : current ? shortDate(current) : "No site"}</span>
+            <span className={styles.readoutSub}>{is3D ? "of the measured motion" : site ? `pass ${passIndex + 1} of ${passes.length}` : "pick a site"}</span>
+            {!is3D && passes.length > 0 && (
+              <span className={styles.ticks} aria-hidden>
+                {passes.map((p, i) => (
+                  <i key={p.date} data-on={i <= passIndex || undefined} data-base={p.baseline || undefined} />
+                ))}
+              </span>
+            )}
           </div>
           <div className={styles.playRow}>
             <button className={styles.stepBtn} onClick={() => step(-1)} disabled={is3D || !site || passIndex <= 0} aria-label="Previous pass" title="Previous pass (←)">
@@ -906,9 +920,13 @@ export function Atlas() {
             <button className={styles.primary} onClick={togglePlay} disabled={!siteId}>
               {(is3D ? motion.playing : playing) ? <Pause aria-hidden /> : <Play aria-hidden />}
               {(is3D ? motion.playing : playing) ? "Pause" : "Play"}
+              <kbd className={styles.primaryKey}>space</kbd>
             </button>
             <button className={styles.stepBtn} onClick={() => step(1)} disabled={is3D || !site || passIndex >= passes.length - 1} aria-label="Next pass" title="Next pass (→)">
               <SkipForward className={ui.icon} aria-hidden />
+            </button>
+            <button className={styles.stepBtn} aria-pressed={loop} onClick={() => setLoop((l) => !l)} disabled={is3D} aria-label="Loop" title="Loop the passes">
+              <Repeat className={ui.icon} aria-hidden />
             </button>
           </div>
         </section>
