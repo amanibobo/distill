@@ -66,6 +66,48 @@
   },
   {
     "site": {
+      "id": "gredos",
+      "name": "Central Spain wildfires",
+      "place": "Sierra de Gredos foothills, \u00c1vila and Madrid, Spain",
+      "bbox": [
+        -4.86,
+        40.19,
+        -4.11,
+        40.56
+      ],
+      "track": 87
+    },
+    "passes": 11,
+    "events": 136,
+    "types": {
+      "other": 123,
+      "fire_scar": 13
+    },
+    "scores": [
+      {
+        "type": "fire_scar",
+        "source": "Copernicus EMS EMSR900 burnt area",
+        "when": null,
+        "pixels": {
+          "precision": 0.89,
+          "recall": 0.291,
+          "iou": 0.281,
+          "predicted_km2": 145.1,
+          "truth_km2": 443.6
+        },
+        "events": {
+          "events_scored": 67,
+          "tp": 11,
+          "tn": 30,
+          "fp": 0,
+          "fn": 26,
+          "accuracy": 0.612
+        }
+      }
+    ]
+  },
+  {
+    "site": {
       "id": "huelva",
       "name": "Huelva wildfire",
       "place": "Niebla and Do\u00f1ana edge, Huelva, Spain",
@@ -234,6 +276,49 @@
           "fp": 2,
           "fn": 2,
           "accuracy": 0.886
+        }
+      }
+    ]
+  },
+  {
+    "site": {
+      "id": "xingu",
+      "name": "S\u00e3o F\u00e9lix do Xingu clearing",
+      "place": "S\u00e3o F\u00e9lix do Xingu, Par\u00e1, Brazil",
+      "bbox": [
+        -52.85,
+        -7.31,
+        -52.45,
+        -6.91
+      ],
+      "track": 74
+    },
+    "passes": 10,
+    "events": 117,
+    "types": {
+      "other": 95,
+      "deforestation": 16,
+      "fire_scar": 6
+    },
+    "scores": [
+      {
+        "type": "deforestation",
+        "source": "INPE DETER clear-cut alerts, 13 Jul to 29 Oct 2026",
+        "when": null,
+        "pixels": {
+          "precision": 0.126,
+          "recall": 0.496,
+          "iou": 0.111,
+          "predicted_km2": 89.6,
+          "truth_km2": 22.7
+        },
+        "events": {
+          "events_scored": 112,
+          "tp": 4,
+          "tn": 99,
+          "fp": 8,
+          "fn": 1,
+          "accuracy": 0.92
         }
       }
     ]

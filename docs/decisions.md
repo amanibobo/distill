@@ -158,3 +158,28 @@ The 3D view now has five places. Each is one provisional NISAR GUNW pair that br
 - Dropped Fuego's 5 Aug eruption. On 134A, 17 Jul to 10 Aug, motion is within about ±6 cm with no pattern centred on the volcano. Coherence is low near the summit, but without a pre-eruption pair it can't be told apart from the usual loss on steep, vegetated slopes.
 - Dropped the Nagqu M7.0 of 22 Oct. Only an urgent-response (UR) product brackets it, not a provisional one.
 - In the app, the switcher lists the places under "Ground motion · 3D", oldest event first. The digit keys run on from the radar sites, so 4 to 8 open them. The rail's 3D button and the 3D mode open the most recent event, Panama, or stay on the open place. `/explore` and the tour still open Venezuela.
+
+## 2026-11-15 — Four more radar sites: three EMS wildfires and an Amazon clearing
+
+Coverage was checked with `asf_search` on one track per site before any download. Each site has at least three baseline passes and seven passes after the event. Windows are 35 to 65 km across, the same scale as Kaiser Canyon.
+
+| Site | Event | Track | Passes | Area (lon, lat) | Reference |
+| --- | --- | --- | --- | --- | --- |
+| Huelva wildfire | EMSR913, from 6 Aug | 023 descending | 11, 27 Jun to 6 Nov, 3 baseline | -6.75 to -6.24, 37.40 to 37.65 | EMS grading, 15 Aug, 337 km² burnt |
+| Viotia wildfires | EMSR909, 31 Jul | 158 ascending | 11, 25 Jun to 4 Nov, 3 baseline | 22.95 to 23.44, 37.99 to 38.31 | EMS grading, 6 Aug, 146 km² |
+| Central Spain wildfires | EMSR900, from 20 Jul | 087 ascending | 11, 8 Jun to 30 Oct, 4 baseline | -4.86 to -4.11, 40.19 to 40.56 | EMS delineation AOI03, 28 Jul, 444 km² |
+| São Félix do Xingu clearing | Dry-season clearing, Pará | 074 ascending | 10, 19 Jun to 29 Oct, 3 baseline | -52.85 to -52.45, -7.31 to -6.91 | INPE DETER clear-cut alerts after 13 Jul, 23 km² |
+
+- **EMS truth.** `ems_perimeter` reads the burnt-area polygons (`observedEventA`, notation "Burnt area") straight out of the product zip with range requests, and scores only inside the product's area of interest, minus anything marked not analysed. It uses the last delineation or grading product.
+- **DETER truth.** Hansen GFC stops at 2024, so it can't score 2026 clearing. INPE DETER publishes 2026 alerts over WFS. `deter_clearing` keeps `DESMATAMENTO_CR` and `DESMATAMENTO_VEG` alerts seen after the baseline. DETER maps clearings of 3 ha or more from 64 m optical imagery, so it undercounts small or cloud-hidden clearings. That makes precision against it a lower bound.
+- **Missing passes.** The 23 and 24 Sep products on these tracks have no HV layer. The fetch skips them, so those sites have one pass fewer.
+- **Dropped Strasevina, Montenegro (EMSR922).** On track 086A, median HV inside the 94 km² burn stayed within 0.4 dB of its baseline on every pass. The only fire-scar event came from a 6 Oct pass whose top rows were 11 dB too dark. That's a striping artifact, not the fire. Without that pass, nothing was detected in the burn.
+- **Dropped the floods.** The Crete floods (EMSR933) are 4 km² or smaller per area, and they have only 3 passes after 1 Oct. The Latvia floods (EMSR926) were mapped from 22 to 24 Aug, but the first NISAR pass after them is on 30 Aug. Chao Phraya has no EMS activation and no independent map of where the flood was. Finding it from Sentinel-1 first, then scoring against that same Sentinel-1 data, would not be an independent check. There wasn't time for both today.
+
+## 2026-11-15 — Lasting forest loss in the tropics is labeled deforestation
+
+**This rule was written after looking at the Xingu reference, so the Xingu score is not an independent check.** At São Félix do Xingu, 46% of DETER clear-cut pixels fell in events that the fire-scar rule had claimed. Clearings there grow pass by pass, just as a fire spreads, so the "grew over passes" test sent them to fire scar. The deforestation rule only fired for small patches that weren't growing. DETER mapped 22.6 km² of clear-cut and 2 km² of burn scar in the same window.
+
+A new rule runs before the fire-scar rule. It applies to darker events that don't recover, within 23.44° of the equator, with tree cover of at least 0.6 (the existing deforestation threshold, not a new one), and HV down by at least 1 dB. These become deforestation, and the reason says the change may also be the burning that follows a clearing. `Features` gains `lat`, the latitude at the centre of the event's window. No other site is in the tropics. Kaiser's export is byte-identical before and after the change. Against DETER, recall rose from 0.02 to 0.50, precision fell from 0.26 to 0.13, and event accuracy fell from 0.95 to 0.92.
+
+Thresholds were not changed for any new site. Central Spain's recall is 0.29 for the same reason as Kaiser's: its largest burned event, 200 km², reached only -0.9 dB in HV at its peak pass, just short of the 1 dB rule. It stays "other".

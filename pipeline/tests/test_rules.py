@@ -91,6 +91,24 @@ def test_small_static_forest_loss_is_deforestation():
     assert label.type is ChangeType.deforestation
 
 
+def test_growing_forest_loss_in_the_tropics_is_deforestation():
+    growing_loss = dict(
+        peak_d_hh=0.4, peak_d_hv=-2, recovered=False, passes_active=4, growth_passes=2, peak_area_km2=15, cover={"tree": 0.8, "grass": 0.2}
+    )
+    tropical = classify(features(**growing_loss, lat=-7.1))
+    assert tropical.type is ChangeType.deforestation
+    assert "may also be a fire" in tropical.reason
+    assert classify(features(**growing_loss, lat=48.2)).type is ChangeType.fire_scar
+    assert classify(features(**growing_loss)).type is ChangeType.fire_scar
+
+
+def test_tropical_grassland_loss_is_not_deforestation():
+    label = classify(
+        features(peak_d_hv=-2, recovered=False, passes_active=4, growth_passes=2, peak_area_km2=12, cover={"tree": 0.2, "grass": 0.8}, lat=-7.1)
+    )
+    assert label.type is ChangeType.fire_scar
+
+
 def test_summer_cropland_drop_is_not_harvest():
     label = classify(features(peak_d_hv=-4, onset=date(2026, 7, 22), recovered=False, passes_active=3, cover={"crop": 0.9}))
     assert label.type is not ChangeType.harvest

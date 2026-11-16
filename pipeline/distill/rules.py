@@ -28,6 +28,7 @@ class Features:
     peak_area_km2: float
     cover: dict[str, float]  # WorldCover class fractions over the footprint
     after_d_hh: float | None = None  # mean HH change over the same ground after the event ended, None if it never ended
+    lat: float | None = None  # latitude of the footprint's centre
 
 
 @dataclass(frozen=True)
@@ -35,6 +36,9 @@ class Label:
     type: ChangeType
     confidence: float
     reason: str
+
+
+TROPIC_LAT = 23.44
 
 
 def _db(x: float) -> str:
@@ -99,6 +103,14 @@ def classify(f: Features) -> Label:
             ChangeType.harvest,
             _clip(conf),
             f"Cross-polarized return fell {_db(f.peak_d_hv)} on cropland in autumn and stayed low, which is what happens when standing crops are cut.",
+        )
+
+    tropical = f.lat is not None and abs(f.lat) <= TROPIC_LAT
+    if f.direction == "darker" and not f.recovered and tropical and tree >= 0.6 and f.peak_d_hv <= -1:
+        return Label(
+            ChangeType.deforestation,
+            _clip(0.45 + 0.2 * _margin(tree, 0.6, 0.3) + 0.1 * _margin(-f.peak_d_hv, 1, 3)),
+            f"Tropical forest lost {_db(f.peak_d_hv)} of cross-polarized return and did not recover. In tropical forest, lasting canopy loss is most often clearing, and the burning that follows a clearing looks the same to radar, so this may also be a fire.",
         )
 
     if f.direction == "darker" and not f.recovered and vegetated >= 0.5 and f.peak_d_hv <= -1:

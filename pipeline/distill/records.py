@@ -24,7 +24,7 @@ def polygon(mask: np.ndarray, e: Event, cube: Cube, to_wgs84) -> MultiPolygon:
     return geom
 
 
-def features(e: Event, cover: dict[str, float]) -> Features:
+def features(e: Event, cover: dict[str, float], lat: float | None = None) -> Features:
     after = e.d_hh[e.recovery :] if e.recovery is not None else None
     return Features(
         direction=e.direction.value,
@@ -37,6 +37,7 @@ def features(e: Event, cover: dict[str, float]) -> Features:
         peak_area_km2=e.peak_area_km2,
         cover=cover,
         after_d_hh=round(float(np.mean(after)), 2) if after is not None and len(after) else None,
+        lat=lat,
     )
 
 
@@ -46,7 +47,9 @@ def build(cube: Cube, events: list[Event], landcover: np.ndarray) -> list[tuple[
     counters: dict[str, int] = {}
     for e in events:
         cover = cover_fractions(landcover[e.window], e.footprint)
-        label = classify(features(e, cover))
+        rows, cols = e.window
+        x, y = cube.grid.transform * ((cols.start + cols.stop) / 2, (rows.start + rows.stop) / 2)
+        label = classify(features(e, cover, lat=to_wgs84(x, y)[1]))
         onset = e.dates[e.onset]
         stem = f"{cube.site.id}-{onset:%m%d}"
         counters[stem] = counters.get(stem, 0) + 1

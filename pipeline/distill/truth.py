@@ -1,11 +1,14 @@
 """Independent ground truth on each site's grid, plus scoring of rule labels against it."""
 
 import json
+import re
 import warnings
+import zipfile
 from dataclasses import dataclass
 from datetime import date
 from pathlib import Path
 
+import fsspec
 import numpy as np
 import planetary_computer
 import pystac_client
@@ -23,6 +26,9 @@ from distill.rasters import grid_bounds_4326, warp
 NIFC = (
     "https://services3.arcgis.com/T4QMspbfLg3qTGWY/arcgis/rest/services/WFIGS_Interagency_Perimeters/FeatureServer/0/query"
 )
+EMS = "https://rapidmapping.emergency.copernicus.eu/backend/"
+DETER = "https://terrabrasilis.dpi.inpe.br/geoserver/deter-amz/ows"
+DETER_CLEARING = ("DESMATAMENTO_CR", "DESMATAMENTO_VEG")
 CDL = "https://nassgeodata.gmu.edu/axis2/services/CDLService/GetCDLFile"
 STAC = "https://planetarycomputer.microsoft.com/api/stac/v1"
 S1_WATER_DB = -18.0
@@ -64,6 +70,74 @@ def nifc_perimeter(cube: Cube, incident: str) -> Truth:
 
     mask = _cached(cube.site.id, "nifc", build)
     return Truth("fire_scar", "NIFC WFIGS final perimeter", mask, np.isfinite(cube.hv).all(axis=0), None)
+
+
+def _ems_layer(product: str, layer: str) -> list[dict]:
+    """GeoJSON features of one layer of a Copernicus EMS rapid-mapping product, read by range requests out of the zip."""
+    zipped = requests.get(f"{EMS}{product}.zip", allow_redirects=False, timeout=60).headers["location"]
+    with fsspec.open(zipped, "rb", block_size=4 * 1024 * 1024) as f:
+        z = zipfile.ZipFile(f)
+        names = [n for n in z.namelist() if re.search(rf"_{layer}_v\d+\.json$", n)]
+        return [feat for n in names for feat in json.loads(z.read(n))["features"]]
+
+
+def ems_perimeter(cube: Cube, products: list[str]) -> Truth:
+    """Burnt area from Copernicus EMS delineation or grading products, scored only inside each product's area of interest."""
+
+    def burn(features: list[dict]) -> np.ndarray:
+        if not features:
+            return np.zeros((cube.grid.rows, cube.grid.cols), bool)
+        local = [transform_geom("EPSG:4326", f"EPSG:{cube.grid.epsg}", f["geometry"]) for f in features]
+        return rasterize(local, out_shape=(cube.grid.rows, cube.grid.cols), transform=cube.grid.transform).astype(bool)
+
+    def build() -> np.ndarray:
+        burnt = np.zeros((cube.grid.rows, cube.grid.cols), bool)
+        aoi = np.zeros_like(burnt)
+        for product in products:
+            burnt |= burn([f for f in _ems_layer(product, "observedEventA") if f["properties"].get("notation") == "Burnt area"])
+            aoi |= burn(_ems_layer(product, "areaOfInterestA")) & ~burn(_ems_layer(product, "notAnalysedA"))
+        if not burnt.any():
+            raise RuntimeError(f"EMS products {products} have no burnt area on this grid")
+        return np.stack([burnt, aoi])
+
+    burnt, aoi = _cached(cube.site.id, "ems", build)
+    code = products[0].split("/")[0]
+    return Truth("fire_scar", f"Copernicus EMS {code} burnt area", burnt, aoi & np.isfinite(cube.hv).all(axis=0), None)
+
+
+def deter_clearing(cube: Cube) -> Truth:
+    """INPE DETER clear-cut alerts seen after the baseline, from the Amazon WFS."""
+
+    def build() -> np.ndarray:
+        w, s, e, n = grid_bounds_4326(cube.grid)
+        classes = ",".join(f"'{c}'" for c in DETER_CLEARING)
+        r = requests.get(
+            DETER,
+            params={
+                "service": "WFS",
+                "version": "2.0.0",
+                "request": "GetFeature",
+                "typeName": "deter-amz:deter_amz",
+                "outputFormat": "application/json",
+                "CQL_FILTER": f"BBOX(geom,{w},{s},{e},{n},'EPSG:4326') AND classname IN ({classes}) "
+                f"AND view_date > '{cube.site.baseline_end}' AND view_date <= '{cube.dates[-1]}'",
+            },
+            timeout=180,
+        )
+        r.raise_for_status()
+        geoms = [transform_geom("EPSG:4326", f"EPSG:{cube.grid.epsg}", f["geometry"]) for f in r.json()["features"]]
+        if not geoms:
+            raise RuntimeError("DETER has no clearing alerts in this window")
+        return rasterize(geoms, out_shape=(cube.grid.rows, cube.grid.cols), transform=cube.grid.transform).astype(bool)
+
+    mask = _cached(cube.site.id, "deter", build)
+    return Truth(
+        "deforestation",
+        f"INPE DETER clear-cut alerts, {cube.site.baseline_end:%-d %b} to {cube.dates[-1]:%-d %b %Y}",
+        mask,
+        np.isfinite(cube.hv).all(axis=0),
+        None,
+    )
 
 
 def _s1_vv(grid: Grid, day: date) -> np.ndarray:
@@ -139,6 +213,14 @@ def site_truth(cube: Cube) -> list[Truth]:
         ]
     if cube.site.id == "iowa":
         return [cdl_corn_soy(cube)]
+    if cube.site.id == "huelva":
+        return [ems_perimeter(cube, ["EMSR913/AOI01/GRA_PRODUCT/EMSR913_AOI01_GRA_PRODUCT_v1"])]
+    if cube.site.id == "viotia":
+        return [ems_perimeter(cube, ["EMSR909/AOI01/GRA_PRODUCT/EMSR909_AOI01_GRA_PRODUCT_v1"])]
+    if cube.site.id == "gredos":
+        return [ems_perimeter(cube, ["EMSR900/AOI03/DEL_MONIT04/EMSR900_AOI03_DEL_MONIT04_v1"])]
+    if cube.site.id == "xingu":
+        return [deter_clearing(cube)]
     return []
 
 
