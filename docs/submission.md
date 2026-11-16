@@ -114,64 +114,89 @@ App (TypeScript):
 
 Hardware: one laptop. The pipeline runs locally, with no cloud compute.
 
-## Project details (paste this one; answers the form's questions)
-
-Live app: https://distill-khaki.vercel.app. Code: https://github.com/amanibobo/distill. Open dataset: https://huggingface.co/datasets/amanibobo/nisar-surface-change-2026.
+## Project details (final; paste this one)
 
 ### What does it do, and how does it work?
 
-Distill turns radar from NASA and ISRO's NISAR satellite into a map of how Earth's surface is changing, one anyone can explore, search and trust.
+Distill turns radar from NASA and ISRO's NISAR satellite into a map of how Earth's surface is changing, one anyone can explore, search and trust. Try it at https://distill-khaki.vercel.app.
 
-- Pick a place, press play, and watch changes appear pass by pass over the real radar image, colored by type: flood, fire scar, harvest, crop growth.
-- Click a change to see when it started, when it peaked, whether it's still going, how big it is, a confidence score, and a plain-English reason, such as "the canopy is gone and the patch grew over five passes."
-- Ask questions like "where did farmland flood since August?" The map shows the matches and the filter it understood, so you can correct it.
-- Draw a box around an area, press Watch, and replay past passes to see alerts fire as change appears.
-- See ground motion from five 2026 earthquakes in 3D, from NISAR interferometry draped over terrain. In Panama the ground moved up to about 1.45 m toward the satellite.
-- Click any change and find places where the ground changed the same way, even at another site. A Washington burn scar's closest match is a burn in Assam.
+- **Watch change happen.** Pick a place, press play, and watch changes appear pass by pass over the real radar image, colored by type: fire scar, flood, harvest, crop growth, deforestation.
+- **Every change explains itself.** Click one to see when it started, when it peaked, whether it's still going, how big it is, a confidence score, and a plain-English reason, such as "the canopy is gone and the patch grew over five passes."
+- **Ask anything with ⌘K.** Ask "which fires are still growing?" Claude answers by calling real tools over our events database, and you watch each tool call stream in, with its result, before the answer and the matching changes.
+- **Find changes like this.** Click any change and find places where the radar signal behaved the same way, even on another continent.
+- **Watch an area.** Draw a box or start from any change, then replay past passes to see which ones would have raised an alert. A daily job checks NASA's archive for new NISAR passes over every watched area.
+- **See the ground move in 3D.** Five 2026 earthquakes are draped over terrain: two in Venezuela, Kumamoto in Japan, the Flores Sea in Indonesia, and Panama, where the ground moved up to about 1.45 m.
 
 How it works:
 
-- We stream only the slice of each 7 GB NISAR file that covers a site, straight from NASA's ASF archive, without downloading whole files.
-- We stack every pass into one block of place and time. A flood becomes a single event with a start, a peak and an end, instead of a pile of separate differences.
-- We correct each pass for rain and drying, then flag only change larger than the noise we measured before each event.
-- Readable rules label each change from how the radar's two polarizations moved, the land cover underneath, and the timing. Claude writes a short caption from the same numbers.
-- We score every label against independent maps: official fire perimeters, USDA crop maps, and Sentinel-1 water maps.
+- **Streaming, not downloading.** We read only the slice of each 7 GB NISAR file that covers a site, straight from NASA's ASF archive.
+- **Events, not snapshots.** We stack every pass into one block of place and time, so a fire becomes one event with a start, a peak and an end, instead of a pile of separate differences.
+- **Measured noise.** We correct each pass for rain and drying, then flag only change larger than the noise we measured before each event.
+- **Readable rules.** Each change is labeled from how the radar's two polarizations moved, the land cover underneath, and the timing. Claude writes a short caption from those same numbers.
+- **Independent scoring.** Every label is scored against independent maps: official Copernicus and NIFC fire perimeters, USDA crop maps, Brazil's INPE deforestation alerts, and Sentinel-1 water maps.
 
-It covers seven radar sites on four continents: wildfires in Washington (Kaiser Canyon), Spain (Huelva, Gredos) and Greece (Viotia), the central Iowa harvest, the Upper Assam monsoon in India, and forest clearing at São Félix do Xingu in the Brazilian Amazon. That's 1,410 changes across 75 radar passes. It also shows ground motion in 3D from five 2026 earthquakes: two in Venezuela, Kumamoto in Japan, the Flores Sea in Indonesia, and Panama.
+It covers seven radar sites on four continents:
+
+- Wildfires in Washington (Kaiser Canyon), Spain (Huelva, Gredos) and Greece (Viotia).
+- The central Iowa harvest.
+- The Upper Assam monsoon in India.
+- Forest clearing in the Brazilian Amazon.
+
+That's 1,410 changes across 75 radar passes, plus the five earthquakes in 3D.
 
 ### What benefits does it have?
 
-- It sees through clouds, smoke and darkness, exactly when optical satellites go blind during floods, fires and monsoons.
-- You don't need to know anything about radar. Every change is explained in plain words.
-- It's honest. Every label shows its reason and confidence, and we publish our accuracy scores, including the weak ones.
-- It's fast. The heavy processing happens once per site, so the map loads instantly and every view has a shareable link.
+- **It sees when others can't.** Radar sees through clouds, smoke and darkness, exactly when optical satellites go blind during floods, fires and monsoons.
+- **No radar knowledge needed.** Every change is explained in plain words, and you can ask questions in plain English.
+- **It's honest.** Every label shows its reason and confidence, and we publish our accuracy scores, including the weak ones.
+- **It's fast and shareable.** The heavy processing happens once per site, so the map loads instantly, and every view has its own link.
+- **It's open.** We released every labeled event as an open dataset on Hugging Face: https://huggingface.co/datasets/amanibobo/nisar-surface-change-2026
 
 ### What is the intended impact?
 
-Disaster responders, farmers, insurers, journalists and students should all be able to see what's changing on the ground within days of a satellite pass, without a remote sensing degree. NISAR is brand new and its data is open, but almost nobody can read it yet. Distill is a step toward making it useful to everyone. We also released our labeled events as what we believe is the first open dataset of NISAR surface change events, on Hugging Face, so researchers can build on it.
+Disaster responders, farmers, insurers, journalists and students should all be able to see what's changing on the ground within days of a satellite pass, without a remote sensing degree.
+
+NISAR is brand new and its data is open, but almost nobody can read it yet. Distill is a step toward making it useful to everyone.
+
+We also released our 1,410 labeled events, with their per-pass footprints, radar signatures and accuracy scores. We believe it's the first open dataset of change events from NISAR, so researchers can build on it.
 
 ### What tools, coding languages, hardware or software did you use?
 
 - **Languages:** Python and TypeScript.
-- **Data:** NISAR L2 GCOV from NASA's ASF DAAC through Earthdata; ESA WorldCover; Copernicus Sentinel-1 through Microsoft Planetary Computer; NIFC fire perimeters; USDA Cropland Data Layer.
-- **Processing:** asf_search, earthaccess, h5py, xarray, NumPy, SciPy, scikit-image, rasterio, Shapely.
-- **App:** Next.js, React, MapLibre GL, react-three-fiber, Supabase Postgres with PostGIS and pgvector.
-- **AI:** the Claude API, for event captions and plain-English search.
+- **NASA data:** NISAR L2 GCOV (radar brightness) and GUNW (ground motion), from NASA's ASF DAAC through Earthdata.
+- **Other data:**
+  - ESA WorldCover.
+  - Copernicus Emergency Management Service burned-area maps.
+  - Copernicus Sentinel-1, through Microsoft Planetary Computer.
+  - Copernicus GLO-30 elevation.
+  - NIFC fire perimeters.
+  - USDA Cropland Data Layer.
+  - INPE DETER deforestation alerts.
+  - USGS earthquake catalog.
+- **Processing:** asf_search, earthaccess, h5py, xarray, NumPy, SciPy, scikit-image, rasterio, Shapely, GeoPandas.
+- **App:** Next.js, React, MapLibre GL, react-three-fiber, and Supabase Postgres with PostGIS and pgvector, hosted on Vercel.
+- **AI:** the Claude API, for event captions and the agent that answers search questions.
 - **Hardware:** one laptop. Everything ran on it, which is why we stream instead of download.
+- **Code:** https://github.com/amanibobo/distill (MIT license)
 
 ### How is the project creative?
 
-- **Change as events in space and time.** Most radar tools compare two dates. We treat the whole time series as one block, so every change has a lifecycle you can play back, and search can include time ("still growing", "since August").
+- **Change as events in space and time.** Most radar tools compare two dates. We treat the whole time series as one block, so every change has a lifecycle you can play back, and search can include time, such as "still growing" or "since August."
 - **Labels that explain themselves.** Instead of a black-box classifier, every label carries the physical reason behind it, written so a non-expert can follow.
+- **Search that shows its work.** Claude answers by calling real tools over the data, and you watch every call happen.
+- **Matching by behavior, not by name.** "Find similar" compares how the radar signal changed over time, so it finds patterns nobody has named yet, across continents.
 - **Scoring in public.** We built honest accuracy checks into the product, not just the pitch.
 
 ### What factors did the team consider?
 
-- **Honesty over polish.** L-band radar barely sees burned grass, so we only find about a quarter of the Kaiser Canyon burn (precision 0.88). In Assam, rice paddies flooded for planting look like floods, so flood detection there is weak, about 5% of the flooded area. We label those cases as uncertain and publish the scores, instead of hiding them. Where it's strong, it's very strong: the Huelva wildfire in Spain scores precision 0.81 and recall 0.92 against the official Copernicus burned-area map, and Iowa's harvest scores 0.91 and 0.93.
+- **Honesty over polish.**
+  - Where fires burned forest and shrubland, Distill matches official maps well. At the Huelva wildfire in Spain, precision is 0.81 and recall 0.92 against the official Copernicus burned-area map.
+  - L-band radar barely sees burned grass, so at Kaiser Canyon we find only about a quarter of the burn (precision 0.88).
+  - In Assam, rice paddies flooded for planting look like floods, so flood detection there is weak, about 5% of the flooded area.
+  - Two of our labeling rules were written after looking at their own site's reference map, and we say so wherever we show those scores.
 - **Tight constraints.** The machine had under 3 GB of free disk, and radar passes come every 12 days. Both shaped the design: stream the data, and reason over time.
-- **Accessibility.** Plain language everywhere, keyboard shortcuts, and colors checked for color blindness, with every type also named in text.
-- **Stated assumptions.** The NISAR interferogram product does not state its sign convention, so the 3D view follows the standard ISCE and ARIA convention, and we say so.
-- **Responsible AI.** Claude only writes captions and parses search questions, from numbers the pipeline computed. It never decides what changed, and we disclose where AI was used.
+- **Accessibility.** Plain language everywhere, keyboard shortcuts, light and dark modes, a guided tour, and colors checked for color blindness, with every type also named in text.
+- **Responsible AI.** Claude only writes captions and answers questions from numbers the pipeline computed. It never decides what changed, and we disclose where AI was used, in the app, the dataset and the code.
 
 ## Use of Super Intelligence (SI)
 
