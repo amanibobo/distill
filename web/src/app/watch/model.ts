@@ -85,3 +85,14 @@ export function bboxPolygon([w, s, e, n]: BBox): Polygon {
   return { type: "Polygon", coordinates: [[[w, s], [e, s], [e, n], [w, n], [w, s]]] };
 }
 
+
+// A NISAR granule ASF lists over a watch, newer than the last pass Distill has processed.
+export type NewPass = { date: string; granule_id: string; track: number };
+
+// The latest scan for one watch. checked_at is null until the first scan.
+export type ScanStatus = {
+  watch_id: string;
+  checked_at: string | null;
+  newest_pass_date: string | null;
+  new_passes: NewPass[];
+};
