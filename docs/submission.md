@@ -116,7 +116,7 @@ Hardware: one laptop. The pipeline runs locally, with no cloud compute.
 
 ## Project details (paste this one; answers the form's questions)
 
-Live app: https://distill-khaki.vercel.app. Code: https://github.com/amanibobo/distill.
+Live app: https://distill-khaki.vercel.app. Code: https://github.com/amanibobo/distill. Open dataset: https://huggingface.co/datasets/amanibobo/nisar-surface-change-2026.
 
 ### What does it do, and how does it work?
 
@@ -148,7 +148,7 @@ It covers four real events: the Kaiser Canyon Fire in Washington, the central Io
 
 ### What is the intended impact?
 
-Disaster responders, farmers, insurers, journalists and students should all be able to see what's changing on the ground within days of a satellite pass, without a remote sensing degree. NISAR is brand new and its data is open, but almost nobody can read it yet. Distill is a step toward making it useful to everyone. We also plan to release our labeled events as the first open dataset of NISAR surface change, so researchers can build on it.
+Disaster responders, farmers, insurers, journalists and students should all be able to see what's changing on the ground within days of a satellite pass, without a remote sensing degree. NISAR is brand new and its data is open, but almost nobody can read it yet. Distill is a step toward making it useful to everyone. We also released our labeled events as what we believe is the first open dataset of NISAR surface change events, on Hugging Face, so researchers can build on it.
 
 ### What tools, coding languages, hardware or software did you use?
 
