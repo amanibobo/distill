@@ -1,6 +1,5 @@
 import { Highlights } from "@/components/highlights";
 import { Ink, Label, Mark } from "@/components/prose";
-import { RadarCompare } from "@/components/radar-compare";
 
 export default function Home() {
   return (
@@ -10,9 +9,17 @@ export default function Home() {
         every change in plain words.
       </p>
 
-      <figure className="see">
-        <RadarCompare site="assam" />
-      </figure>
+      <p className="links-row">
+        <a href="/map">Open the map</a>
+        <span aria-hidden>&middot;</span>
+        <a href="https://github.com/amanibobo/distill" target="_blank" rel="noopener">
+          Code on GitHub
+        </a>
+        <span aria-hidden>&middot;</span>
+        <a href="https://huggingface.co/datasets/amanibobo/nisar-surface-change-2026" target="_blank" rel="noopener">
+          Open dataset on Hugging Face
+        </a>
+      </p>
 
       <section aria-labelledby="what">
         <Label id="what">what it does</Label>

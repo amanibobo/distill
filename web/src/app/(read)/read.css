@@ -237,13 +237,28 @@
   margin: 18px 0 0 -11px;
 }
 
-.see {
-  margin: 56px -20px 0;
+.links-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 12px;
+  margin: 18px 0 0 !important;
+  font-size: 15px;
+  color: var(--ink-3);
 }
 
-@media (min-width: 900px) {
-  .see {
-    margin-left: -120px;
-    margin-right: -120px;
-  }
+.links-row a {
+  color: var(--ink-2);
+  text-decoration: underline;
+  text-decoration-color: rgb(0 0 0 / 0.2);
+  text-underline-offset: 0.25em;
+}
+
+.links-row a:first-child {
+  color: var(--select);
+  text-decoration-color: rgb(47 123 246 / 0.4);
+}
+
+.links-row a:hover {
+  color: var(--ink);
 }
