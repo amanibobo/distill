@@ -436,12 +436,110 @@
   flex-direction: column;
   align-items: center;
   gap: 4px;
-  padding-top: 8px;
+  padding: 8px 0 2px;
+  min-height: 0;
+}
+
+.app[data-rail="open"] {
+  grid-template-columns: 200px minmax(0, 1fr);
+}
+
+.app[data-rail="open"] .rail {
+  align-items: stretch;
+  padding-left: 10px;
+  padding-right: 10px;
+}
+
+.railLabel,
+.railKey {
+  display: none;
+}
+
+.app[data-rail="open"] .railBtn {
+  display: flex;
+  justify-content: flex-start;
+  gap: 10px;
+  width: auto;
+  padding: 0 10px;
+  font-size: 13px;
+  text-decoration: none;
+}
+
+.app[data-rail="open"] .logoCell {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  gap: 10px;
+  padding-left: 20px;
+  color: var(--ink);
+  font-size: 15px;
+  text-decoration: none;
+}
+
+.app[data-rail="open"] .railLabel {
+  display: inline;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.app[data-rail="open"] .railKey {
+  display: inline-grid;
+  place-items: center;
+  margin-left: auto;
+  height: 20px;
+  padding: 0 5px;
+  border: 1px solid var(--line);
+  border-radius: 5px;
+  background: var(--raised);
+  color: var(--ink-3);
+  font: inherit;
+  font-size: 11px;
+}
+
+.app[data-rail="open"] .railRule {
+  width: auto;
+  margin: 6px 10px;
+}
+
+.railSpacer {
+  flex: 1;
+}
+
+.app:not([data-rail="open"]) .railBtn[data-tip] {
+  position: relative;
+}
+
+.app:not([data-rail="open"]) .railBtn[data-tip]:hover::after,
+.app:not([data-rail="open"]) .railBtn[data-tip]:focus-visible::after {
+  content: attr(data-tip);
+  position: absolute;
+  left: calc(100% + 8px);
+  top: 50%;
+  z-index: 20;
+  transform: translateY(-50%);
+  padding: 5px 9px;
+  border-radius: 7px;
+  background: #111;
+  color: #fff;
+  font-size: 12px;
+  line-height: 1.3;
+  white-space: pre;
+  pointer-events: none;
+  animation: tip 150ms ease-out;
+}
+
+@keyframes tip {
+  from {
+    opacity: 0;
+    transform: translate(-2px, -50%);
+  }
 }
 
 .railBtn {
   display: grid;
   place-items: center;
+  flex-shrink: 0;
   width: 36px;
   height: 36px;
   border: 0;

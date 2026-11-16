@@ -16,6 +16,8 @@ import {
   RotateCcw,
   ScanSearch,
   Search,
+  PanelLeftClose,
+  PanelLeftOpen,
   Repeat,
   SkipBack,
   SkipForward,
@@ -109,6 +111,21 @@ export function Atlas() {
   const [playing, setPlaying] = useState(false);
   const [speed, setSpeed] = useState<1 | 2>(1);
   const [loop, setLoop] = useState(false);
+  const [railOpen, setRailOpen] = useState(() => {
+    try {
+      return typeof window !== "undefined" && localStorage.getItem("distill.rail") === "open";
+    } catch {
+      return false;
+    }
+  });
+  const toggleRail = useCallback(() => {
+    setRailOpen((o) => {
+      try {
+        localStorage.setItem("distill.rail", o ? "closed" : "open");
+      } catch {}
+      return !o;
+    });
+  }, []);
   const [radarOn, setRadarOn] = useState(true);
   const [toast, setToast] = useState<{ id: number; content: ReactNode } | null>(null);
   const [camera, setCamera] = useState<Camera | null>(null);
@@ -498,11 +515,12 @@ export function Atlas() {
       : null;
 
   return (
-    <div className={styles.app}>
+    <div className={styles.app} data-rail={railOpen ? "open" : undefined}>
       <CommandPalette />
       <Tour navigate={(href) => router.push(href)} />
       <Link href="/" className={styles.logoCell} aria-label="Distill home" title="Distill">
         <LogoMark className={ui.logo} />
+        <span className={styles.railLabel}>Distill</span>
       </Link>
 
       <header className={styles.top}>
@@ -566,22 +584,39 @@ export function Atlas() {
       </header>
 
       <nav className={styles.rail} aria-label="Tools">
-        <button className={styles.railBtn} aria-pressed={panelOpen} disabled={!site} onClick={() => setPanelOpen((o) => !o)} aria-label="Changes" title="Changes on this site">
+        <button className={styles.railBtn} aria-pressed={panelOpen} disabled={!site} onClick={() => setPanelOpen((o) => !o)} aria-label="Changes" data-tip="Changes on this site">
           <List className={ui.icon} aria-hidden />
+          <span className={styles.railLabel}>Changes</span>
         </button>
-        <button className={styles.railBtn} onClick={openCommandPalette} aria-label="Ask" title="Ask (⌘K)">
+        <button className={styles.railBtn} onClick={openCommandPalette} aria-label="Ask" data-tip="Ask anything  ⌘K">
           <Search className={ui.icon} aria-hidden />
+          <span className={styles.railLabel}>Ask</span>
+          <kbd className={styles.railKey}>⌘K</kbd>
         </button>
-        <button className={styles.railBtn} aria-pressed={mode === "watch"} onClick={() => (mode === "watch" ? dispatch({ type: "close" }) : startWatch())} aria-label="Watch" title="Watch an area">
+        <button className={styles.railBtn} aria-pressed={mode === "watch"} onClick={() => (mode === "watch" ? dispatch({ type: "close" }) : startWatch())} aria-label="Watch" data-tip="Watch an area">
           <SquareDashed className={ui.icon} aria-hidden />
+          <span className={styles.railLabel}>Watch an area</span>
         </button>
-        <button className={styles.railBtn} aria-pressed={is3D} onClick={() => chooseSite(EXPLORE_SITE)} aria-label="3D" title="Ground motion in 3D">
+        <button className={styles.railBtn} aria-pressed={is3D} onClick={() => chooseSite(EXPLORE_SITE)} aria-label="3D" data-tip="Ground motion in 3D">
           <Mountain className={ui.icon} aria-hidden />
+          <span className={styles.railLabel}>Ground motion in 3D</span>
         </button>
         <span className={styles.railRule} />
-        <Link className={styles.railBtn} href="/writeup" aria-label="Writeup" title="Writeup">
+        <Link className={styles.railBtn} href="/writeup" aria-label="Writeup" data-tip="How it works">
           <BookOpen className={ui.icon} aria-hidden />
+          <span className={styles.railLabel}>Writeup</span>
         </Link>
+        <span className={styles.railSpacer} />
+        <a className={styles.railBtn} href="https://github.com/amanibobo/distill" target="_blank" rel="noopener" aria-label="GitHub" data-tip="Code on GitHub">
+          <svg className={ui.icon} viewBox="0 0 16 16" fill="currentColor" aria-hidden>
+            <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z" />
+          </svg>
+          <span className={styles.railLabel}>GitHub</span>
+        </a>
+        <button className={styles.railBtn} onClick={toggleRail} aria-label={railOpen ? "Collapse sidebar" : "Expand sidebar"} aria-expanded={railOpen} data-tip={railOpen ? undefined : "Expand sidebar"}>
+          {railOpen ? <PanelLeftClose className={ui.icon} aria-hidden /> : <PanelLeftOpen className={ui.icon} aria-hidden />}
+          <span className={styles.railLabel}>Collapse</span>
+        </button>
       </nav>
 
       <div className={styles.canvas} ref={canvasRef}>
