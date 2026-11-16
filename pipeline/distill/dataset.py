@@ -120,6 +120,16 @@ tags:
 - geospatial
 size_categories:
 - 1K<n<10K
+configs:
+- config_name: events
+  data_files: events.parquet
+  default: true
+- config_name: footprints
+  data_files: footprints.parquet
+- config_name: sites
+  data_files: sites.parquet
+- config_name: scores
+  data_files: scores.parquet
 ---
 
 # NISAR surface change events, 2026
