@@ -1,0 +1,356 @@
+.button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 32px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 8px;
+  background: none;
+  color: var(--ink-2);
+  font: inherit;
+  font-family: var(--font-sans);
+  font-size: 13px;
+  font-weight: 400;
+  cursor: pointer;
+  transition:
+    background 150ms ease-out,
+    color 150ms ease-out;
+}
+
+.button:hover,
+.button[aria-expanded="true"] {
+  background: var(--hover);
+  color: var(--ink);
+}
+
+.icon {
+  width: 16px;
+  height: 16px;
+  stroke-width: 1.5;
+  flex-shrink: 0;
+}
+
+.card {
+  position: fixed;
+  right: 16px;
+  bottom: 16px;
+  z-index: 60;
+  display: flex;
+  flex-direction: column;
+  width: 360px;
+  max-width: calc(100vw - 32px);
+  max-height: calc(100dvh - 32px);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--raised);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.45;
+  box-shadow: 0 24px 64px -16px rgb(0 0 0 / 0.14), 0 4px 16px -4px rgb(0 0 0 / 0.06);
+  transform-origin: bottom right;
+  animation: appear 180ms ease-out;
+}
+
+.card :where(h2, p, ol) {
+  margin: 0;
+}
+
+.card button {
+  font-family: inherit;
+  font-weight: 400;
+}
+
+.head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px 12px 0 18px;
+}
+
+.title {
+  font-size: 15px;
+  font-weight: 400;
+  color: var(--ink);
+}
+
+.count {
+  margin-top: 2px;
+  font-size: 13px;
+  color: var(--ink-2);
+}
+
+.close {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  margin-top: -2px;
+  border: 0;
+  border-radius: 8px;
+  background: none;
+  color: var(--ink-3);
+  cursor: pointer;
+  transition:
+    background 150ms ease-out,
+    color 150ms ease-out;
+}
+
+.close:hover {
+  background: var(--hover);
+  color: var(--ink);
+}
+
+.close svg {
+  width: 16px;
+  height: 16px;
+  stroke-width: 1.5;
+}
+
+.progress {
+  height: 4px;
+  margin: 12px 18px 8px;
+  border-radius: 999px;
+  background: var(--hover);
+  overflow: hidden;
+}
+
+.progress span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--ink);
+  transition: width 200ms ease-out;
+}
+
+.steps {
+  list-style: none;
+  padding: 0 8px;
+  overflow-y: auto;
+  min-height: 0;
+}
+
+.step + .step {
+  border-top: 1px solid var(--line);
+}
+
+.step[data-open] + .step,
+.step:has(+ .step[data-open]) {
+  border-top-color: transparent;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 42px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 10px;
+  background: none;
+  color: var(--ink);
+  font-size: 14px;
+  text-align: left;
+  cursor: pointer;
+  transition: background 150ms ease-out;
+}
+
+.row:hover {
+  background: var(--hover);
+}
+
+.step[data-open] .row:hover {
+  background: none;
+}
+
+.check {
+  width: 18px;
+  height: 18px;
+  stroke-width: 1.5;
+  flex-shrink: 0;
+  color: var(--ink-3);
+}
+
+.check[data-done] {
+  color: var(--ink);
+}
+
+.rowLabel {
+  flex: 1;
+  min-width: 0;
+}
+
+.rowLabel[data-done] {
+  color: var(--ink-2);
+}
+
+.chevron {
+  width: 16px;
+  height: 16px;
+  stroke-width: 1.5;
+  flex-shrink: 0;
+  color: var(--ink-3);
+  transition: transform 180ms ease-out;
+}
+
+.step[data-open] .chevron {
+  transform: rotate(180deg);
+}
+
+.panel {
+  padding: 2px 10px 14px 38px;
+  animation: appear 180ms ease-out;
+  transform-origin: top center;
+}
+
+.demo {
+  position: relative;
+}
+
+.video {
+  display: block;
+  width: 100%;
+  aspect-ratio: 8 / 5;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--surface);
+  object-fit: cover;
+}
+
+.playDemo {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  margin: auto;
+  width: 44px;
+  height: 44px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--raised);
+  color: var(--ink);
+  box-shadow: 0 8px 24px -8px rgb(0 0 0 / 0.18);
+  cursor: pointer;
+}
+
+.playDemo svg {
+  width: 18px;
+  height: 18px;
+  stroke-width: 1.5;
+  margin-left: 2px;
+}
+
+.copy {
+  margin-top: 10px;
+  font-size: 13px;
+  color: var(--ink-2);
+}
+
+.try {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 32px;
+  margin-top: 12px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: 8px;
+  background: #111;
+  color: #fff;
+  font-size: 13px;
+  cursor: pointer;
+  transition: background 150ms ease-out;
+}
+
+.try:hover {
+  background: var(--ink);
+}
+
+.try svg {
+  width: 14px;
+  height: 14px;
+  stroke-width: 1.75;
+}
+
+.foot {
+  display: flex;
+  justify-content: flex-end;
+  padding: 6px 12px 12px;
+  border-top: 1px solid var(--line);
+  margin-top: 4px;
+}
+
+.link {
+  height: 28px;
+  padding: 0 8px;
+  border: 0;
+  border-radius: 8px;
+  background: none;
+  color: var(--ink-3);
+  font-size: 13px;
+  cursor: pointer;
+  transition: color 150ms ease-out;
+}
+
+.link:hover {
+  color: var(--ink);
+}
+
+.button:focus-visible,
+.close:focus-visible,
+.row:focus-visible,
+.try:focus-visible,
+.link:focus-visible,
+.playDemo:focus-visible {
+  outline: 2px solid var(--select);
+  outline-offset: 1px;
+}
+
+@keyframes appear {
+  from {
+    opacity: 0;
+    transform: scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card,
+  .panel {
+    animation: none;
+  }
+
+  .chevron,
+  .progress span {
+    transition: none;
+  }
+}
+
+.keys {
+  display: inline-flex;
+  gap: 3px;
+  margin-left: 6px;
+  vertical-align: 1px;
+}
+
+.cap {
+  display: inline-grid;
+  place-items: center;
+  min-width: 22px;
+  height: 22px;
+  padding: 0 5px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--raised);
+  color: var(--ink-2);
+  font-family: var(--font-sans);
+  font-size: 12px;
+  line-height: 1;
+}
