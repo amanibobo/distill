@@ -398,3 +398,52 @@ Other rules from the same guide and the Judging and Awards Guide (https://www.sp
 - Judging criteria: Impact, Creativity, Validity, Relevance and Presentation.
 
 The guide sets no word limit for the summary. The 150-word cap here is our own.
+
+## Form links (verified 200 on 2026-11-15)
+
+### NASA Data
+
+| Link Text | Link Url |
+|---|---|
+| NISAR mission (NASA JPL) | https://nisar.jpl.nasa.gov/ |
+| NISAR data on NASA Earthdata | https://www.earthdata.nasa.gov/data/platforms/space-based-platforms/nisar |
+| NISAR L2 GCOV radar backscatter product (ASF DAAC) | https://nisar-docs.asf.alaska.edu/gcov/ |
+| NISAR L2 GUNW unwrapped interferogram product (ASF DAAC) | https://nisar-docs.asf.alaska.edu/gunw/ |
+| NISAR provisional product known issues (ASF DAAC) | https://nisar-docs.asf.alaska.edu/provisional-known-issues/ |
+| ASF Data Search (Vertex) | https://search.asf.alaska.edu/ |
+| asf_search Python library (ASF) | https://docs.asf.alaska.edu/asf_search/basics/ |
+| NASA Earthdata Login | https://urs.earthdata.nasa.gov/ |
+| earthaccess library (NASA NSIDC DAAC) | https://github.com/nsidc/earthaccess |
+
+### Space Agency Partner & Other Data
+
+| Link Text | Link Url |
+|---|---|
+| ESA WorldCover land cover | https://esa-worldcover.org/en |
+| Copernicus EMS EMSR913, Huelva wildfire burned area | https://mapping.emergency.copernicus.eu/activations/EMSR913/ |
+| Copernicus EMS EMSR909, Viotia wildfire burned area | https://mapping.emergency.copernicus.eu/activations/EMSR909/ |
+| Copernicus EMS EMSR900, Central Spain wildfires burned area | https://mapping.emergency.copernicus.eu/activations/EMSR900/ |
+| Copernicus Sentinel-1 RTC (Microsoft Planetary Computer) | https://planetarycomputer.microsoft.com/dataset/sentinel-1-rtc |
+| Copernicus Sentinel-2 L2A (Microsoft Planetary Computer) | https://planetarycomputer.microsoft.com/dataset/sentinel-2-l2a |
+| Copernicus DEM GLO-30 | https://registry.opendata.aws/copernicus-dem/ |
+| USDA Cropland Data Layer (Microsoft Planetary Computer) | https://planetarycomputer.microsoft.com/dataset/usda-cdl |
+| NIFC WFIGS interagency fire perimeters | https://data-nifc.opendata.arcgis.com/ |
+| INPE DETER deforestation alerts (TerraBrasilis) | https://terrabrasilis.dpi.inpe.br/ |
+| USGS Earthquake Catalog | https://earthquake.usgs.gov/earthquakes/search/ |
+| CARTO basemaps | https://carto.com/basemaps |
+| OpenStreetMap map data | https://www.openstreetmap.org/copyright |
+| Anthropic Claude API | https://docs.anthropic.com/ |
+| Next.js | https://nextjs.org/ |
+| MapLibre GL JS | https://maplibre.org/ |
+| react-three-fiber | https://github.com/pmndrs/react-three-fiber |
+| Supabase Postgres | https://supabase.com/ |
+| PostGIS | https://postgis.net/ |
+| pgvector | https://github.com/pgvector/pgvector |
+| Vercel hosting | https://vercel.com/ |
+| Rough.js hand-drawn diagrams | https://roughjs.com/ |
+| Virgil font (Excalidraw) | https://github.com/excalidraw/virgil |
+| Lucide icons | https://lucide.dev/ |
+| Geist font | https://vercel.com/font |
+| Simple Icons (Hugging Face logo) | https://simpleicons.org/ |
+| Distill source code (our project) | https://github.com/amanibobo/distill |
+| Distill open dataset of NISAR change events (our project) | https://huggingface.co/datasets/amanibobo/nisar-surface-change-2026 |
