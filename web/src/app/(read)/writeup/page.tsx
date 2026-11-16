@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Label, Mono } from "@/components/prose";
 import accuracy from "@/data/accuracy.json";
 import { CubeSketch, FireSignalSketch, PipelineSketch, RulesSketch, ServingSketch } from "./diagrams";
+import { ExploreSection } from "./explore-section";
 
 export const metadata: Metadata = { title: "Writeup · Distill" };
 
@@ -149,6 +150,8 @@ export default function Writeup() {
           blind spots.
         </p>
       </section>
+
+      <ExploreSection />
 
       <section aria-labelledby="stack">
         <Label id="stack">serving it</Label>

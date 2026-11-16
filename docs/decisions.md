@@ -123,3 +123,7 @@ Unexplained "other" events get a template caption instead of a Claude call, and 
 ## 2026-11-15 — Process page removed; remaining layers built in parallel
 
 The Process tab and page are gone at the user's request. The tabs are now Map, Watch, Explore and Writeup. Search, Watch (areas and replayed alerts), Explore (3D GUNW deformation), find more like this (pgvector embeddings), the radar versus optical slider, and the submission text are being built by parallel agents. Each one owns separate files.
+
+## 2026-11-15 — Explore: Venezuela GUNW, sign convention inferred
+
+`/explore` shows line-of-sight motion from NISAR GUNW track 162A, frame 7, for the pair 13 Jun and 25 Jun 2026, which brackets the 24 June M7.2 and M7.5 quakes. It's draped on the Copernicus GLO-30 DEM. The product's ionosphere screen is removed, values are referenced to the window median, and coherence below 0.3 is faded. **The sign convention is inferred, not stated in the product.** It follows the ISCE and ARIA GUNW convention, where positive phase means range increase. If that's wrong, toward and away swap. The playback is a linear blend between two passes and is labeled as one.
