@@ -1,4 +1,4 @@
-import type { BBox, CheckResult, TypeChange, Watch, WatchShape } from "./model";
+import type { BBox, CheckResult, TypeChange, Watch, WatchShape } from "@/app/watch/model";
 
 export type FeedItem = { date: string; index: number; baseline: boolean; changes: TypeChange[] };
 
@@ -6,7 +6,7 @@ export type Replay =
   | { status: "idle" }
   | { status: "running" | "done"; next: number; feed: FeedItem[]; shapes: WatchShape[]; error: string | null };
 
-// One screen, one step at a time: pick a site, draw an area, name it, then watch and replay.
+// Watching inside the map, one step at a time. "site" means not watching; then draw an area, name it, watch and replay.
 export type Flow =
   | { step: "site" }
   | { step: "draw"; site: string; drawing: boolean }
@@ -15,6 +15,8 @@ export type Flow =
 
 export type Action =
   | { type: "site"; site: string }
+  | { type: "propose"; site: string; bbox: BBox }
+  | { type: "close" }
   | { type: "back" }
   | { type: "draw" }
   | { type: "cancelDraw" }
@@ -30,14 +32,19 @@ export type Action =
 export function reduce(flow: Flow, a: Action): Flow {
   switch (a.type) {
     case "site":
-      return { step: "draw", site: a.site, drawing: false };
+      return { step: "draw", site: a.site, drawing: true };
+    case "propose":
+      return { step: "name", site: a.site, bbox: a.bbox, saving: false, error: null };
+    case "close":
+      return { step: "site" };
     case "back":
-      return flow.step === "watch" || flow.step === "name" ? { step: "draw", site: flow.site, drawing: false } : { step: "site" };
+      return flow.step === "watch" || flow.step === "name" ? { step: "draw", site: flow.site, drawing: true } : { step: "site" };
     case "draw":
       return flow.step === "site" ? flow : { step: "draw", site: flow.site, drawing: true };
     case "cancelDraw":
       return flow.step === "draw" ? { ...flow, drawing: false } : flow;
     case "drawn":
+      if (flow.step === "name") return { ...flow, bbox: a.bbox };
       return flow.step === "draw" ? { step: "name", site: flow.site, bbox: a.bbox, saving: false, error: null } : flow;
     case "save":
       return flow.step === "name" ? { ...flow, saving: true, error: null } : flow;

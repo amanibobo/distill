@@ -1,3 +1,4 @@
+// Shared with the API routes, which import it from this path, so it stays outside the (app) route group.
 import type { MultiPolygon, Polygon } from "geojson";
 import { CHANGE_TYPES, type ChangeType } from "@/lib/change-types";
 import { area, shortDate } from "@/lib/format";

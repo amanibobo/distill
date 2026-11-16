@@ -1,8 +1,5 @@
-import type { Metadata } from "next";
-import { WatchLoader } from "./watch-loader";
-
-export const metadata: Metadata = { title: "Watch · Distill" };
+import { RedirectToMap } from "../map/redirect";
 
 export default function WatchPage() {
-  return <WatchLoader />;
+  return <RedirectToMap from="watch" />;
 }

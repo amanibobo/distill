@@ -127,3 +127,14 @@ The Process tab and page are gone at the user's request. The tabs are now Map, W
 ## 2026-11-15 — Explore: Venezuela GUNW, sign convention inferred
 
 `/explore` shows line-of-sight motion from NISAR GUNW track 162A, frame 7, for the pair 13 Jun and 25 Jun 2026, which brackets the 24 June M7.2 and M7.5 quakes. It's draped on the Copernicus GLO-30 DEM. The product's ionosphere screen is removed, values are referenced to the window median, and coherence below 0.3 is faded. **The sign convention is inferred, not stated in the product.** It follows the ISCE and ARIA GUNW convention, where positive phase means range increase. If that's wrong, toward and away swap. The playback is a linear blend between two passes and is labeled as one.
+
+## 2026-11-15 — One screen, canvas first
+
+This supersedes the Map/Watch/Explore tabs. The user found the features felt "shoved together" and hard to play with, and shared a pro creative-tool reference (Viewfinder) as the target. The app is now one screen at `/map`:
+
+- A breadcrumb with a site switcher, which includes "Venezuela earthquake · 3D".
+- A thin icon rail.
+- The map as the canvas, with floating toolbars and the ⌘K ask pill.
+- A dock: pass filmstrip, selected change with Find similar and Watch this area, a Play card (the only filled button), and a Map/Watch/3D mode switch.
+
+Watch and 3D happen in the same frame. `/watch` and `/explore` redirect into it. Opening `/map` with no parameters starts on Kaiser Canyon with the passes playing. Search is the ⌘K palette, which streams Claude's tool calls over the events table. The inline rail search and `/api/search` are removed. A first-visit tour has six steps with recorded clips.

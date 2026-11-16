@@ -2,23 +2,26 @@
 
 import {
   Map as MapLibre,
-  NavigationControl,
   ScaleControl,
   setWorkerUrl,
   type GeoJSONSource,
   type ImageSource,
+  type LngLat,
   type MapGeoJSONFeature,
 } from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 import { useEffect, useRef, useState } from "react";
-import type { FeatureCollection, MultiPolygon, Point } from "geojson";
+import type { FeatureCollection, MultiPolygon, Point, Polygon } from "geojson";
+import { bboxPolygon, type BBox } from "@/app/watch/model";
 import type { Camera } from "./url-state";
 import styles from "./atlas.module.css";
+import ui from "./ui.module.css";
 
 setWorkerUrl("/maplibre-gl-worker.mjs");
 
 const BASEMAP = "https://basemaps.cartocdn.com/gl/positron-gl-style/style.json";
 const EMPTY: FeatureCollection = { type: "FeatureCollection", features: [] };
+const MIN_DRAG_PX = 8;
 const BLANK_IMAGE = "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
 
 const HATCH_COLOR: [number, number, number] = [0x1b, 0xaf, 0x7a];
@@ -57,7 +60,18 @@ type Props = {
   onHover: (id: string | null) => void;
   onCamera: (c: Camera) => void;
   onCursor: (lngLat: [number, number] | null) => void;
+  // Watch: the dashed box, and whether a drag draws a new one instead of panning.
+  area: Polygon | null;
+  drawing: boolean;
+  onDrawn: (bbox: BBox) => void;
+  highlightIds: string[];
+  onMap: (map: MapLibre | null) => void;
 };
+
+const boxOf = (a: LngLat, b: LngLat): BBox => [Math.min(a.lng, b.lng), Math.min(a.lat, b.lat), Math.max(a.lng, b.lng), Math.max(a.lat, b.lat)];
+const polygons = (items: Polygon[]): FeatureCollection => ({ type: "FeatureCollection", features: items.map((geometry) => ({ type: "Feature", geometry, properties: {} })) });
+
+export type { MapLibre };
 
 export function MapView(props: Props) {
   const container = useRef<HTMLDivElement>(null);
@@ -83,7 +97,7 @@ export function MapView(props: Props) {
       dragRotate: false,
     });
     mapRef.current = map;
-    map.addControl(new NavigationControl({ showCompass: false }), "top-left");
+    props.onMap(map);
     map.addControl(new ScaleControl({ unit: "metric", maxWidth: 110 }), "bottom-left");
 
     map.on("style.load", () => {
@@ -116,8 +130,17 @@ export function MapView(props: Props) {
         type: "line",
         source: "events",
         paint: {
-          "line-color": ["case", ["boolean", ["feature-state", "selected"], false], "#2f7bf6", ["get", "color"]],
-          "line-width": ["case", ["boolean", ["feature-state", "selected"], false], 2, ["boolean", ["feature-state", "hover"], false], 1.5, 1],
+          "line-color": ["case", ["boolean", ["feature-state", "selected"], false], "#2f7bf6", ["boolean", ["feature-state", "similar"], false], "#2b2b2b", ["get", "color"]],
+          "line-width": [
+            "case",
+            ["boolean", ["feature-state", "selected"], false],
+            2,
+            ["boolean", ["feature-state", "similar"], false],
+            2,
+            ["boolean", ["feature-state", "hover"], false],
+            1.5,
+            1,
+          ],
           "line-opacity": 0.95,
         },
       });
@@ -136,7 +159,26 @@ export function MapView(props: Props) {
         maxzoom: 7,
         paint: { "circle-radius": 4.5, "circle-color": ["get", "color"], "circle-stroke-width": 1.5, "circle-stroke-color": "#ffffff" },
       });
+      map.addSource("area", { type: "geojson", data: EMPTY });
+      map.addLayer({ id: "area-fill", type: "fill", source: "area", paint: { "fill-color": "#2b2b2b", "fill-opacity": 0.04 } });
+      map.addLayer({ id: "area-line", type: "line", source: "area", paint: { "line-color": "#2b2b2b", "line-width": 1.5, "line-dasharray": [3, 2] } });
       setReady(true);
+    });
+
+    let start: { lngLat: LngLat; x: number; y: number } | null = null;
+    const draft = (items: Polygon[]) => (map.getSource("area") as GeoJSONSource | undefined)?.setData(polygons(items));
+    map.on("mousedown", (e) => {
+      if (!handlers.current.drawing) return;
+      e.preventDefault();
+      start = { lngLat: e.lngLat, x: e.point.x, y: e.point.y };
+    });
+    map.on("mouseup", (e) => {
+      if (!start) return;
+      const dragged = Math.hypot(e.point.x - start.x, e.point.y - start.y) >= MIN_DRAG_PX;
+      const bbox = boxOf(start.lngLat, e.lngLat);
+      start = null;
+      if (dragged) handlers.current.onDrawn(bbox);
+      else draft(handlers.current.area ? [handlers.current.area] : []);
     });
 
     const hit = (point: { x: number; y: number }) => {
@@ -146,6 +188,8 @@ export function MapView(props: Props) {
     };
 
     map.on("mousemove", (e) => {
+      if (start) return void draft([bboxPolygon(boxOf(start.lngLat, e.lngLat))]);
+      if (handlers.current.drawing) return;
       const { ev, site } = hit(e.point);
       handlers.current.onHover(ev ? String(ev.properties.id) : null);
       handlers.current.onCursor([e.lngLat.lng, e.lngLat.lat]);
@@ -159,6 +203,7 @@ export function MapView(props: Props) {
       setTip(null);
     });
     map.on("click", (e) => {
+      if (handlers.current.drawing) return;
       const { ev, site } = hit(e.point);
       if (ev) handlers.current.onEvent(String(ev.properties.id));
       else if (site) handlers.current.onSite(String(site.properties.id));
@@ -170,6 +215,7 @@ export function MapView(props: Props) {
     });
 
     return () => {
+      handlers.current.onMap(null);
       map.remove();
       mapRef.current = null;
     };
@@ -210,6 +256,29 @@ export function MapView(props: Props) {
   useEffect(() => {
     const map = mapRef.current;
     if (!ready || !map) return;
+    const ids = props.highlightIds;
+    for (const id of ids) map.setFeatureState({ source: "events", id }, { similar: true });
+    return () => {
+      if (map.getSource("events")) for (const id of ids) map.setFeatureState({ source: "events", id }, { similar: false });
+    };
+  }, [ready, props.highlightIds, props.shapes]);
+
+  useEffect(() => {
+    if (!ready) return;
+    (mapRef.current?.getSource("area") as GeoJSONSource | undefined)?.setData(polygons(props.area ? [props.area] : []));
+  }, [ready, props.area]);
+
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map) return;
+    if (props.drawing) map.dragPan.disable();
+    else map.dragPan.enable();
+    map.getCanvas().style.cursor = props.drawing ? "crosshair" : "";
+  }, [props.drawing]);
+
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!ready || !map) return;
     const src = map.getSource("radar") as ImageSource | undefined;
     if (props.radar) src?.updateImage({ url: props.radar.url, coordinates: props.radar.coordinates });
     map.setPaintProperty("radar", "raster-opacity", props.radar ? props.radarOpacity : 0);
@@ -232,8 +301,8 @@ export function MapView(props: Props) {
   }, [ready, focusKey]);
 
   return (
-    <div className={styles.mapWrap}>
-      <div ref={container} className={styles.map} />
+    <div className={ui.mapWrap}>
+      <div ref={container} className={ui.map} />
       {tip && (
         <div className={styles.tip} style={{ left: tip.x, top: tip.y }}>
           {tip.text}

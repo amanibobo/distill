@@ -1,8 +1,5 @@
-import type { Metadata } from "next";
-import { ExploreLoader } from "./explore-loader";
-
-export const metadata: Metadata = { title: "Explore · Distill" };
+import { RedirectToMap } from "../map/redirect";
 
 export default function ExplorePage() {
-  return <ExploreLoader />;
+  return <RedirectToMap from="explore" />;
 }
