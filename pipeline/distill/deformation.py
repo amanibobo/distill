@@ -54,6 +54,7 @@ class Site:
     others: tuple[Quake, ...]
     center: tuple[float, float]
     size_km: float
+    track: int | None = None  # pin a track when the default pick covers the window poorly
 
 
 def _utc(s: str) -> datetime:
@@ -62,6 +63,11 @@ def _utc(s: str) -> datetime:
 
 SAN_FELIPE = Quake("us6000t7zc", 7.2, -68.5564, 10.3713, _utc("2026-06-24T22:04:31"), "20 km E of San Felipe, Venezuela")
 CATIA = Quake("us6000t7zp", 7.5, -67.2205, 10.5955, _utc("2026-06-24T22:05:04"), "20 km W of Catia La Mar, Venezuela")
+KUMAMOTO = Quake("us6000tgb9", 6.8, 130.6601, 32.6177, _utc("2026-07-28T07:27:14"), "The 2026 Kumamoto Region, Japan Earthquake")
+ENDE = Quake("us6000tkt2", 7.8, 121.3446, -8.3358, _utc("2026-08-14T21:58:21"), "66 km NNW of Ende, Indonesia")
+PITALOZA = Quake("us6000u18k", 7.7, -80.7566, 7.6069, _utc("2026-10-09T17:56:05"), "10 km WSW of Pitaloza Arriba, Panama")
+RIO_GRANDE = Quake("us6000u19w", 6.6, -81.4515, 7.676, _utc("2026-10-09T20:25:38"), "13 km WSW of Río Grande, Panama")
+LA_TRONOSA = Quake("us6000u1cf", 6.0, -80.5728, 7.4777, _utc("2026-10-10T04:14:01"), "4 km NNE of La Tronosa, Panama")
 
 SITES: dict[str, Site] = {
     "venezuela": Site(
@@ -71,6 +77,44 @@ SITES: dict[str, Site] = {
         quake=SAN_FELIPE,
         others=(CATIA,),
         center=(-68.30, 10.33),
+        size_km=64.0,
+    ),
+    "catia": Site(
+        id="catia",
+        name="Catia La Mar earthquake",
+        place="Vargas coast west of Caracas, Venezuela",
+        quake=CATIA,
+        others=(SAN_FELIPE,),
+        center=(-67.22, 10.36),
+        size_km=64.0,
+        track=126,
+    ),
+    "kumamoto": Site(
+        id="kumamoto",
+        name="Kumamoto earthquake",
+        place="Kumamoto, Kyushu, Japan",
+        quake=KUMAMOTO,
+        others=(),
+        center=(130.66, 32.62),
+        size_km=64.0,
+    ),
+    "panama": Site(
+        id="panama",
+        name="Panama earthquake",
+        place="Azuero Peninsula, Los Santos, Panama",
+        quake=PITALOZA,
+        others=(RIO_GRANDE, LA_TRONOSA),
+        center=(-80.70, 7.60),
+        size_km=64.0,
+        track=40,
+    ),
+    "flores": Site(
+        id="flores",
+        name="Flores Sea earthquake",
+        place="North coast of Flores, Indonesia",
+        quake=ENDE,
+        others=(),
+        center=(121.40, -8.55),
         size_km=64.0,
     ),
 }
@@ -92,6 +136,8 @@ def find_pair(site: Site) -> dict:
         file_id = r.properties["fileID"]
         parts = file_id.split("_")
         if parts[2] != "PR" or not shape(r.geometry).contains(Point(q.lon, q.lat)):
+            continue
+        if site.track is not None and int(parts[5]) != site.track:
             continue
         ref, sec = (datetime.strptime(p, "%Y%m%dT%H%M%S").replace(tzinfo=timezone.utc) for p in (parts[11], parts[13]))
         if not ref < q.time < sec:

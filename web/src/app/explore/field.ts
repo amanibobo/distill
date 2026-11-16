@@ -17,7 +17,7 @@ export type Meta = {
   pixel_m: number;
   extent_km: number;
   bounds: { west: number; south: number; east: number; north: number };
-  pair: { reference: string; secondary: string; days: number; track: number; direction: string; frame: number };
+  pair: { reference: string; secondary: string; days: number; track: number; direction: "ascending" | "descending"; frame: number };
   source: { gunw: string; dem: string[]; dem_product: string };
   displacement: { units: "cm"; limit: number; min: number; max: number; p1: number; p99: number };
   coherence: { threshold: number };

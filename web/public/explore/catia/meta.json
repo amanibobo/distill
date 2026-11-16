@@ -1,0 +1,86 @@
+{
+  "site": "catia",
+  "name": "Catia La Mar earthquake",
+  "place": "Vargas coast west of Caracas, Venezuela",
+  "size": 512,
+  "pixel_m": 125.0,
+  "extent_km": 64.0,
+  "epsg": 32619,
+  "bounds": {
+    "west": -67.51363286225144,
+    "south": 10.069739168433385,
+    "east": -66.92602405164857,
+    "north": 10.651523974923338
+  },
+  "pair": {
+    "reference": "2026-06-22T22:54:16+00:00",
+    "secondary": "2026-07-04T22:54:15+00:00",
+    "days": 12,
+    "track": 126,
+    "direction": "descending",
+    "frame": 83
+  },
+  "source": {
+    "gunw": "NISAR_L2_PR_GUNW_023_126_D_083_024_4000_SH_20260622T225416_20260622T225450_20260704T225415_20260704T225450_P05023_N_F_J_001",
+    "dem": [
+      "Copernicus_DSM_COG_10_N10_00_W068_00_DEM",
+      "Copernicus_DSM_COG_10_N10_00_W067_00_DEM"
+    ],
+    "dem_product": "Copernicus GLO-30"
+  },
+  "displacement": {
+    "units": "cm",
+    "sign": "positive is toward the satellite (line of sight)",
+    "reference": "median of the trusted pixels in the window",
+    "wavelength_m": 0.2419632429378531,
+    "ionosphere": "product ionosphere phase screen subtracted",
+    "min": -18.11542320251465,
+    "max": 59.15535354614258,
+    "p99_abs": 34.456573486328125,
+    "p1": -10.747657775878906,
+    "p99": 34.456573486328125,
+    "limit": 40.0,
+    "encoding": "displacement.bin is little-endian int16 millimetres, row-major from the north-west corner"
+  },
+  "coherence": {
+    "threshold": 0.3,
+    "encoding": "coherence.png is coherence x 255, zero off the main unwrapping component or on water"
+  },
+  "height": {
+    "min_m": -0.01776259019970894,
+    "max_m": 2414.66064453125,
+    "encoding": "height.bin is little-endian uint16, min_m + v / 65535 * (max_m - min_m)"
+  },
+  "quality": {
+    "main_component": 1,
+    "main_component_frac": 0.8357703125,
+    "trusted_frac": 0.7544109375,
+    "water_frac": 0.1511296875,
+    "shown_frac": 0.7746315002441406
+  },
+  "quakes": [
+    {
+      "id": "us6000t7zp",
+      "magnitude": 7.5,
+      "lon": -67.2205,
+      "lat": 10.5955,
+      "time": "2026-06-24T22:05:04+00:00",
+      "place": "20 km W of Catia La Mar, Venezuela",
+      "col": 254.47226393583418,
+      "row": 48.23749360099435
+    }
+  ],
+  "nearby_quakes": [
+    {
+      "id": "us6000t7zc",
+      "magnitude": 7.2,
+      "lon": -68.5564,
+      "lat": 10.3713,
+      "time": "2026-06-24T22:04:31+00:00",
+      "place": "20 km E of San Felipe, Venezuela",
+      "col": -914.5534574663387,
+      "row": 250.7277417764403,
+      "km_from_main": 148.33305290711453
+    }
+  ]
+}

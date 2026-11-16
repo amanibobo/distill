@@ -1,0 +1,73 @@
+{
+  "site": "flores",
+  "name": "Flores Sea earthquake",
+  "place": "North coast of Flores, Indonesia",
+  "size": 512,
+  "pixel_m": 125.0,
+  "extent_km": 64.0,
+  "epsg": 32751,
+  "bounds": {
+    "west": 121.10732183584174,
+    "south": -8.840211909150645,
+    "east": 121.69108571405135,
+    "north": -8.259143269580765
+  },
+  "pair": {
+    "reference": "2026-08-12T21:40:30+00:00",
+    "secondary": "2026-08-24T21:40:29+00:00",
+    "days": 12,
+    "track": 168,
+    "direction": "ascending",
+    "frame": 173
+  },
+  "source": {
+    "gunw": "NISAR_L2_PR_GUNW_027_168_A_173_028_4000_SH_20260812T214030_20260812T214104_20260824T214029_20260824T214104_P05023_N_F_J_001",
+    "dem": [
+      "Copernicus_DSM_COG_10_S09_00_E121_00_DEM"
+    ],
+    "dem_product": "Copernicus GLO-30"
+  },
+  "displacement": {
+    "units": "cm",
+    "sign": "positive is toward the satellite (line of sight)",
+    "reference": "median of the trusted pixels in the window",
+    "wavelength_m": 0.2419632429378531,
+    "ionosphere": "product ionosphere phase screen subtracted",
+    "min": -7.462669849395752,
+    "max": 11.198768615722656,
+    "p99_abs": 8.18443775177002,
+    "p1": -3.6571767330169678,
+    "p99": 8.18443775177002,
+    "limit": 10.0,
+    "encoding": "displacement.bin is little-endian int16 millimetres, row-major from the north-west corner"
+  },
+  "coherence": {
+    "threshold": 0.3,
+    "encoding": "coherence.png is coherence x 255, zero off the main unwrapping component or on water"
+  },
+  "height": {
+    "min_m": -0.00035946740536019206,
+    "max_m": 2103.750732421875,
+    "encoding": "height.bin is little-endian uint16, min_m + v / 65535 * (max_m - min_m)"
+  },
+  "quality": {
+    "main_component": 1,
+    "main_component_frac": 0.5267796875,
+    "trusted_frac": 0.509575,
+    "water_frac": 0.4637796875,
+    "shown_frac": 0.5172462463378906
+  },
+  "quakes": [
+    {
+      "id": "us6000tkt2",
+      "magnitude": 7.8,
+      "lon": 121.3446,
+      "lat": -8.3358,
+      "time": "2026-08-14T21:58:21+00:00",
+      "place": "66 km NNW of Ende, Indonesia",
+      "col": 206.91351734632207,
+      "row": 66.90584398549795
+    }
+  ],
+  "nearby_quakes": []
+}

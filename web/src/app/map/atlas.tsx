@@ -40,7 +40,7 @@ import { Feed } from "@/app/watch/feed";
 import { reduce, type Flow } from "@/app/watch/flow";
 import { bboxPolygon, isNews, type BBox, type CheckResult, type Watch } from "@/app/watch/model";
 import { findSimilar, Inspector, STATUS, type Similar } from "./inspector";
-import { EXPLORE_SITE, isTyping } from "./links";
+import { DEFAULT_MOTION_SITE, isMotionSite, MOTION_SITES, isTyping } from "./links";
 import { MapView, type EventShapes, type Focus, type MapLibre, type Radar, type SitePoint } from "./map-view";
 import { readViewState, writeViewState, type Camera } from "./url-state";
 import styles from "./atlas.module.css";
@@ -101,7 +101,7 @@ export function Atlas() {
   const [initial] = useState(() => readViewState(window.location.search));
   const [sites, setSites] = useState<SiteSummary[] | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [siteId, setSiteId] = useState<string | null>(initial.site === EXPLORE_SITE ? EXPLORE_SITE : null);
+  const [siteId, setSiteId] = useState<string | null>(isMotionSite(initial.site) ? initial.site : null);
   const [events, setEvents] = useState<ChangeEvent[]>([]);
   const [radar, setRadar] = useState<RadarManifest | null>(null);
   const [pass, setPass] = useState<string | null>(null);
@@ -142,8 +142,9 @@ export function Atlas() {
   const router = useRouter();
   const params = useSearchParams();
 
-  const is3D = siteId === EXPLORE_SITE;
-  const motion = useMotion(is3D);
+  const motionId = isMotionSite(siteId) ? siteId : null;
+  const is3D = motionId !== null;
+  const motion = useMotion(motionId);
   const site = sites?.find((s) => s.id === siteId) ?? null;
   const passes = useMemo(() => site?.passes ?? [], [site]);
   const event = events.find((e) => e.id === selected) ?? null;
@@ -172,7 +173,7 @@ export function Atlas() {
             dispatch({ type: "site", site: start.id });
             if (initial.bbox) dispatch({ type: "propose", site: start.id, bbox: initial.bbox });
           }
-        } else if (!initial.camera && rows.length && initial.site !== EXPLORE_SITE) {
+        } else if (!initial.camera && rows.length && !isMotionSite(initial.site)) {
           setFocus({ bbox: worldBox(rows), key: "world:start" });
         }
       })
@@ -180,7 +181,7 @@ export function Atlas() {
   }, [initial]);
 
   useEffect(() => {
-    if (!siteId || siteId === EXPLORE_SITE) return;
+    if (!siteId || isMotionSite(siteId)) return;
     let live = true;
     Promise.all([
       fetch(`/api/sites/${siteId}`).then((r) => r.json() as Promise<ChangeEvent[]>),
@@ -249,8 +250,8 @@ export function Atlas() {
       setHovered(null);
       setPlaying(false);
       setPass(null);
-      if (id === EXPLORE_SITE) {
-        setSiteId(EXPLORE_SITE);
+      if (isMotionSite(id)) {
+        setSiteId(id);
         return;
       }
       const s = sites?.find((x) => x.id === id);
@@ -429,7 +430,7 @@ export function Atlas() {
         else if (siteId) backToWorld();
       } else if (sites && /^[1-9]$/.test(e.key)) {
         const n = Number(e.key);
-        const id = n <= sites.length ? sites[n - 1].id : n === sites.length + 1 ? EXPLORE_SITE : null;
+        const id = [...sites.map((s) => s.id), ...MOTION_SITES.map((s) => s.id)][n - 1];
         if (id) {
           chooseSite(id);
           flash(e.key);
@@ -503,7 +504,7 @@ export function Atlas() {
   const drawing = (flow.step === "draw" && flow.drawing) || flow.step === "name";
   const alertCount = replay && replay.status !== "idle" ? replay.feed.reduce((n, f) => n + f.changes.filter(isNews).length, 0) : 0;
 
-  const switcherLabel = is3D ? "Venezuela earthquake" : (site?.name ?? "All sites");
+  const switcherLabel = is3D ? motion.name : (site?.name ?? "All sites");
   const crumb = is3D ? motion.location.join(" · ") : site && current ? `${longDate(current)} · pass ${passIndex + 1} of ${passes.length}` : "June to November 2026";
 
   const hint = drawing
@@ -550,18 +551,25 @@ export function Atlas() {
                 );
               })}
               {sites && (
-                <li>
-                  <button className={`${ui.row} ${ui.rowCompact}`} data-selected={is3D || undefined} role="menuitem" onClick={() => chooseSite(EXPLORE_SITE)}>
-                    <Mountain className={ui.icon} style={{ color: "var(--ink-3)" }} aria-hidden />
-                    <span className={ui.rowText}>
-                      <span className={ui.rowLabel}>Venezuela earthquake</span>
-                      <span className={ui.rowSub}>Ground motion · 2 passes</span>
-                    </span>
-                    <span className={ui.tag}>3D</span>
-                    <kbd className={ui.cap}>{sites.length + 1}</kbd>
-                  </button>
+                <li className={styles.menuGroup} role="presentation">
+                  Ground motion · 3D
                 </li>
               )}
+              {sites &&
+                MOTION_SITES.map((p, i) => (
+                  <li key={p.id}>
+                    <button className={`${ui.row} ${ui.rowCompact}`} data-selected={p.id === motionId || undefined} role="menuitem" onClick={() => chooseSite(p.id)}>
+                      <Mountain className={ui.icon} style={{ color: "var(--ink-3)" }} aria-hidden />
+                      <span className={ui.rowText}>
+                        <span className={ui.rowLabel}>{p.name}</span>
+                        <span className={ui.rowSub}>
+                          M{p.magnitude.toFixed(1)} · {shortDate(p.date)}
+                        </span>
+                      </span>
+                      {sites.length + i + 1 <= 9 && <kbd className={ui.cap}>{sites.length + i + 1}</kbd>}
+                    </button>
+                  </li>
+                ))}
               <li>
                 <button className={`${ui.row} ${ui.rowCompact}`} role="menuitem" onClick={backToWorld}>
                   <MapIcon className={ui.icon} style={{ color: "var(--ink-3)" }} aria-hidden />
@@ -597,7 +605,7 @@ export function Atlas() {
           <SquareDashed className={ui.icon} aria-hidden />
           <span className={styles.railLabel}>Watch an area</span>
         </button>
-        <button className={styles.railBtn} aria-pressed={is3D} onClick={() => chooseSite(EXPLORE_SITE)} aria-label="3D" data-tip="Ground motion in 3D">
+        <button className={styles.railBtn} aria-pressed={is3D} onClick={() => chooseSite(motionId ?? DEFAULT_MOTION_SITE)} aria-label="3D" data-tip="Ground motion in 3D">
           <Mountain className={ui.icon} aria-hidden />
           <span className={styles.railLabel}>Ground motion in 3D</span>
         </button>
@@ -882,7 +890,7 @@ export function Atlas() {
           ) : is3D ? (
             <>
               <div className={styles.dockHead}>
-                Ground motion <span className={styles.dockMeta}>Venezuela, M7.2 and M7.5</span>
+                Ground motion <span className={styles.dockMeta}>{motion.headline}</span>
               </div>
               <p className={styles.selHint}>Drag to orbit the terrain. Blue moved toward the satellite, red away.</p>
             </>
@@ -975,7 +983,7 @@ export function Atlas() {
             <SquareDashed className={ui.icon} aria-hidden />
             Watch
           </button>
-          <button className={styles.mode} aria-pressed={mode === "3d"} onClick={() => chooseSite(EXPLORE_SITE)}>
+          <button className={styles.mode} aria-pressed={mode === "3d"} onClick={() => chooseSite(motionId ?? DEFAULT_MOTION_SITE)}>
             <Mountain className={ui.icon} aria-hidden />
             3D
           </button>

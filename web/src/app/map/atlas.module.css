@@ -423,6 +423,14 @@
   margin: 0;
 }
 
+.menuGroup {
+  margin: 6px 0 2px;
+  padding: 8px 10px 2px;
+  border-top: 1px solid var(--line);
+  color: var(--ink-3);
+  font-size: 12px;
+}
+
 .topEnd {
   display: flex;
   align-items: center;

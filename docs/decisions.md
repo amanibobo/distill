@@ -138,3 +138,23 @@ This supersedes the Map/Watch/Explore tabs. The user found the features felt "sh
 - A dock: pass filmstrip, selected change with Find similar and Watch this area, a Play card (the only filled button), and a Map/Watch/3D mode switch.
 
 Watch and 3D happen in the same frame. `/watch` and `/explore` redirect into it. Opening `/map` with no parameters starts on Kaiser Canyon with the passes playing. Search is the ⌘K palette, which streams Claude's tool calls over the events table. The inline rail search and `/api/search` are removed. A first-visit tour has six steps with recorded clips.
+
+## 2026-11-15 — 3D ground motion: four more places
+
+The 3D view now has five places. Each is one provisional NISAR GUNW pair that brackets the event, picked by `find_pair` and processed the same way as Venezuela. The ionosphere screen is removed, values are referenced to the window median, and coherence below 0.3 is faded. Venezuela's export is byte-identical to before.
+
+| Place | Event (USGS) | Pair | Track | 1st to 99th percentile |
+| --- | --- | --- | --- | --- |
+| Catia La Mar | us6000t7zp, M7.5, 24 Jun | 22 Jun to 4 Jul, 12 days | 126 descending, frame 83 | -11 to +34 cm |
+| Kumamoto | us6000tgb9, M6.8, 28 Jul | 21 Jul to 14 Aug, 24 days | 24 ascending, frame 18 | -21 to +19 cm |
+| Flores Sea | us6000tkt2, M7.8, 14 Aug | 12 Aug to 24 Aug, 12 days | 168 ascending, frame 173 | -4 to +8 cm |
+| Panama | us6000u18k, M7.7, 9 Oct | 2 Oct to 14 Oct, 12 days | 40 descending, frame 85 | -31 to +145 cm |
+
+- `Site.track` pins a track when the default pick covers the window poorly. Catia is pinned to 126D because 162A, the Venezuela pair, has an unwrapping step along the swath edge and 061A keeps 22% of the window. Panama is pinned to 40D because 141D is a partial frame that keeps 17% and 76A has unwrapping steps.
+- Catia's ascending and descending pairs show opposite-signed gradients over the same coast. That fits mostly horizontal motion, not an atmospheric ramp.
+- Flores is offshore. The window covers the north coast of Flores, so it shows the far field, about 10 cm. Tropical atmosphere can add a few cm.
+- The sign convention is still inferred, as for Venezuela. The look direction is read from the product: `identification/lookDirection` is Left, so ascending passes look west and descending passes look east. The facts card words toward and away from that.
+- Dropped the Colombia M7.4 of 10 Aug (us6000tjl2). It was 116 km deep. On 148A, 18 Jul to 11 Aug, 18% of the window stayed coherent over the Chocó forest, and the rest split along the swath edge with striping. That is an artifact, not a deformation pattern.
+- Dropped Fuego's 5 Aug eruption. On 134A, 17 Jul to 10 Aug, motion is within about ±6 cm with no pattern centred on the volcano. Coherence is low near the summit, but without a pre-eruption pair it can't be told apart from the usual loss on steep, vegetated slopes.
+- Dropped the Nagqu M7.0 of 22 Oct. Only an urgent-response (UR) product brackets it, not a provisional one.
+- In the app, the switcher lists the places under "Ground motion · 3D", oldest event first. The digit keys run on from the radar sites, so 4 to 8 open them. The rail's 3D button and the 3D mode open the most recent event, Panama, or stay on the open place. `/explore` and the tour still open Venezuela.

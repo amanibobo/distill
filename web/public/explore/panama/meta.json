@@ -1,0 +1,95 @@
+{
+  "site": "panama",
+  "name": "Panama earthquake",
+  "place": "Azuero Peninsula, Los Santos, Panama",
+  "size": 512,
+  "pixel_m": 125.0,
+  "extent_km": 64.0,
+  "epsg": 32617,
+  "bounds": {
+    "west": -80.99057768021858,
+    "south": 7.310894817462745,
+    "east": -80.40996349186783,
+    "north": 7.890206014352219
+  },
+  "pair": {
+    "reference": "2026-10-02T23:45:16+00:00",
+    "secondary": "2026-10-14T23:45:16+00:00",
+    "days": 12,
+    "track": 40,
+    "direction": "descending",
+    "frame": 85
+  },
+  "source": {
+    "gunw": "NISAR_L2_PR_GUNW_032_040_D_085_033_4000_SH_20261002T234516_20261002T234533_20261014T234516_20261014T234533_P05023_N_P_J_001",
+    "dem": [
+      "Copernicus_DSM_COG_10_N07_00_W081_00_DEM"
+    ],
+    "dem_product": "Copernicus GLO-30"
+  },
+  "displacement": {
+    "units": "cm",
+    "sign": "positive is toward the satellite (line of sight)",
+    "reference": "median of the trusted pixels in the window",
+    "wavelength_m": 0.2419632429378531,
+    "ionosphere": "product ionosphere phase screen subtracted",
+    "min": -34.250022888183594,
+    "max": 174.16400146484375,
+    "p99_abs": 144.99404907226562,
+    "p1": -31.238014221191406,
+    "p99": 144.99404907226562,
+    "limit": 150.0,
+    "encoding": "displacement.bin is little-endian int16 millimetres, row-major from the north-west corner"
+  },
+  "coherence": {
+    "threshold": 0.3,
+    "encoding": "coherence.png is coherence x 255, zero off the main unwrapping component or on water"
+  },
+  "height": {
+    "min_m": 0.0,
+    "max_m": 1539.81201171875,
+    "encoding": "height.bin is little-endian uint16, min_m + v / 65535 * (max_m - min_m)"
+  },
+  "quality": {
+    "main_component": 1,
+    "main_component_frac": 0.5948828125,
+    "trusted_frac": 0.5009578125,
+    "water_frac": 0.048671875,
+    "shown_frac": 0.5091781616210938
+  },
+  "quakes": [
+    {
+      "id": "us6000u18k",
+      "magnitude": 7.7,
+      "lon": -80.7566,
+      "lat": 7.6069,
+      "time": "2026-10-09T17:56:05+00:00",
+      "place": "10 km WSW of Pitaloza Arriba, Panama",
+      "col": 206.46101163200754,
+      "row": 250.4960564770624
+    },
+    {
+      "id": "us6000u1cf",
+      "magnitude": 6.0,
+      "lon": -80.5728,
+      "lat": 7.4777,
+      "time": "2026-10-10T04:14:01+00:00",
+      "place": "4 km NNE of La Tronosa, Panama",
+      "col": 368.76391803511325,
+      "row": 364.6371204047231
+    }
+  ],
+  "nearby_quakes": [
+    {
+      "id": "us6000u19w",
+      "magnitude": 6.6,
+      "lon": -81.4515,
+      "lat": 7.676,
+      "time": "2026-10-09T20:25:38+00:00",
+      "place": "13 km WSW of R\u00edo Grande, Panama",
+      "col": -406.67140175844867,
+      "row": 189.23493987525814,
+      "km_from_main": 77.05338717826835
+    }
+  ]
+}

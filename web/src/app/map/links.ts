@@ -1,7 +1,23 @@
 import type { BBox } from "@/app/watch/model";
 
-// Explore's Venezuela scene is a place in the map's site list, under this id, though it has no radar changes.
-export const EXPLORE_SITE = "venezuela";
+// The 3D ground-motion places, oldest event first. Each is a place in the map's site list, though it has no
+// radar changes, and each has an export from pipeline/distill/deformation.py in public/explore/<id>/.
+export const MOTION_SITES = [
+  { id: "venezuela", name: "Venezuela earthquakes", magnitude: 7.2, date: "2026-06-24" },
+  { id: "catia", name: "Catia La Mar earthquake", magnitude: 7.5, date: "2026-06-24" },
+  { id: "kumamoto", name: "Kumamoto earthquake", magnitude: 6.8, date: "2026-07-28" },
+  { id: "flores", name: "Flores Sea earthquake", magnitude: 7.8, date: "2026-08-14" },
+  { id: "panama", name: "Panama earthquake", magnitude: 7.7, date: "2026-10-09" },
+] as const;
+
+export type MotionSite = (typeof MOTION_SITES)[number];
+export type MotionSiteId = MotionSite["id"];
+
+export const isMotionSite = (id: string | null): id is MotionSiteId => MOTION_SITES.some((s) => s.id === id);
+export const motionSite = (id: MotionSiteId): MotionSite => MOTION_SITES.find((s) => s.id === id)!;
+
+// The 3D button opens the most recent event.
+export const DEFAULT_MOTION_SITE: MotionSiteId = MOTION_SITES[MOTION_SITES.length - 1].id;
 
 export function parseBBox(raw: string | null): BBox | null {
   const v = raw?.split(",").map(Number);

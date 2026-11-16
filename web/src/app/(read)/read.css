@@ -237,66 +237,86 @@
   margin: 18px 0 0 -11px;
 }
 
-.cta {
+.read-main section.links-block {
+  margin-top: 40px;
+}
+
+.links-title {
+  margin: 0;
+  font: 400 11px/1.4 var(--font-mono);
+  color: rgb(11 11 10 / 0.45);
+}
+
+.links {
+  list-style: none;
+  margin: 20px 0 0;
+  padding: 0;
+}
+
+.links li + li {
+  border-top: 1px solid rgb(11 11 10 / 0.07);
+}
+
+.links a {
   display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  margin-top: 28px;
-}
-
-.btn {
-  display: inline-flex;
   align-items: center;
-  justify-content: center;
-  gap: 8px;
-  height: 44px;
-  padding: 0 20px;
-  border-radius: 999px;
-  font-size: 14px;
-  font-weight: 500;
-  line-height: 1;
-  text-decoration: none !important;
-  transition: transform 0.2s cubic-bezier(0.3, 0.7, 0.2, 1), background-color 0.15s ease, opacity 0.15s ease;
+  gap: 12px;
+  padding: 12px 8px;
+  margin: 0 -8px;
+  border-radius: 8px;
+  color: #0b0b0a;
+  font-size: 15px;
+  line-height: 1.7;
+  text-decoration: none;
+  transition: background-color 0.15s ease;
 }
 
-.btn svg {
-  width: 14px;
-  height: 14px;
+.links a:hover {
+  background: rgb(11 11 10 / 0.035);
+}
+
+.links a:focus-visible {
+  outline: 2px solid var(--select);
+  outline-offset: 2px;
+}
+
+.links .icon {
+  width: 16px;
+  height: 16px;
   flex-shrink: 0;
-  transition: transform 0.2s cubic-bezier(0.3, 0.7, 0.2, 1);
+  color: rgb(11 11 10 / 0.7);
+  fill: currentColor;
+  transition: color 0.15s ease;
 }
 
-.btn:active {
-  transform: scale(0.97);
+.links .icon-stroke {
+  fill: none;
+  stroke-width: 2;
 }
 
-.btn-solid {
-  background: #0b0b0a;
-  color: #fafaf8 !important;
+.links a:hover .icon {
+  color: #0b0b0a;
 }
 
-.btn-solid:hover {
-  opacity: 0.86;
+.links-label {
+  flex: 1;
 }
 
-.btn-solid svg {
+.links .meta {
+  font: 400 12px var(--font-mono);
+  color: rgb(11 11 10 / 0.45);
+}
+
+.links .arrow {
   width: 12px;
   height: 12px;
+  color: rgb(11 11 10 / 0.45);
+  transition: transform 0.2s cubic-bezier(0.3, 0.7, 0.2, 1), color 0.15s ease;
 }
 
-.btn-solid:hover svg {
-  transform: translateX(2px);
+.links a:hover .arrow {
+  transform: translate(2px, -2px);
+  color: #0b0b0a;
 }
 
-.btn-soft {
-  background: rgb(255 255 255 / 0.72);
-  color: #0b0b0a !important;
-  box-shadow: inset 0 0 0 1px rgb(20 50 120 / 0.1);
-  -webkit-backdrop-filter: blur(10px);
-  backdrop-filter: blur(10px);
-}
-
-.btn-soft:hover {
-  background: #fafaf8;
-}
 
