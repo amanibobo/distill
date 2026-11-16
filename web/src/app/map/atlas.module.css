@@ -1082,3 +1082,17 @@
 .ticks i[data-on]:not([data-base]) {
   background: var(--ink);
 }
+
+.scanCard {
+  position: absolute;
+  left: 12px;
+  bottom: 40px;
+  z-index: 3;
+  width: 340px;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--raised);
+  box-shadow: 0 8px 28px rgb(0 0 0 / 0.08);
+  animation: fade 180ms ease-out;
+}

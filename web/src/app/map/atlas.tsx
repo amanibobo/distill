@@ -31,6 +31,7 @@ import type { Position } from "geojson";
 import { CommandPalette, CommandTrigger, openCommandPalette } from "@/components/command/command-palette";
 import { LogoMark } from "@/components/logo";
 import { Tour, TourButton } from "@/components/tour/tour";
+import { WatchScan } from "@/components/watch-scan/watch-scan";
 import { tour } from "@/components/tour/store";
 import { CHANGE_TYPES, swatch, type ChangeType } from "@/lib/change-types";
 import { area, longDate, shortDate } from "@/lib/format";
@@ -628,6 +629,14 @@ export function Atlas() {
       </nav>
 
       <div className={styles.canvas} ref={canvasRef}>
+        {flow.step === "watch" && site && !is3D && (
+          <aside className={styles.scanCard} aria-label="Live checks">
+            <div className={styles.dockHead}>
+              Live checks <span className={styles.dockMeta}>daily, from NASA&rsquo;s ASF archive</span>
+            </div>
+            <WatchScan watchId={flow.watch.id} site={site} />
+          </aside>
+        )}
         {is3D ? (
           <>
             <MotionStage m={motion} />
