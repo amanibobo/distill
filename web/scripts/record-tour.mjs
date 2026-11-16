@@ -93,7 +93,7 @@ const panel = (page) => page.getByRole("complementary", { name: /change details/
 const control = (page, name) => page.getByRole("button", { name }).or(page.getByRole("link", { name })).first();
 
 async function stopPlayback(page) {
-  const pauseBtn = page.getByRole("button", { name: /^pause$/i }).first();
+  const pauseBtn = page.getByRole("button", { name: /^pause/i }).first();
   if (await pauseBtn.isVisible().catch(() => false)) await pauseBtn.click();
 }
 
@@ -102,14 +102,15 @@ async function stopPlayback(page) {
 const STEPS = {
   async play(page, clip) {
     await page.goto(`${BASE}/map?site=kaiser`);
-    await page.getByRole("heading", { name: /Kaiser Canyon Fire/ }).waitFor({ timeout: 20000 });
+    await page.getByRole("button", { name: /^(play|pause)/i }).first().waitFor({ timeout: 20000 });
+    await pause(page, 1500);
     await stopPlayback(page);
     const first = page.getByRole("button", { name: /^Jul 25, 2026/ }).first();
     if (await first.isVisible().catch(() => false)) await first.click();
     await pause(page, 1200);
     clip.keep();
     await click(page, page.getByRole("button", { name: /^play/i }).first());
-    await page.getByRole("button", { name: /^pause$/i }).first().waitFor();
+    await page.getByRole("button", { name: /^pause/i }).first().waitFor();
     await pause(page, 7000);
   },
 
@@ -154,7 +155,7 @@ const STEPS = {
 
   async similar(page, clip) {
     await page.goto(`${BASE}${EVENT}`);
-    const find = panel(page).getByRole("button", { name: /find similar/i });
+    const find = page.getByRole("button", { name: /find similar/i }).first();
     await find.waitFor({ timeout: 20000 });
     await stopPlayback(page);
     await pause(page, 1500);
@@ -165,10 +166,9 @@ const STEPS = {
     await click(page, find);
     await pause(page, 500);
     clip.cut();
-    await panel(page).getByText(/searching every site/i).waitFor({ state: "detached", timeout: 30000 });
+    await page.getByText(/searching every site/i).first().waitFor({ state: "detached", timeout: 30000 }).catch(() => {});
     clip.keep();
-    await wheel(page, 400, 5);
-    const rows = panel(page).locator("section", { hasText: /changes like this/i }).getByRole("button");
+    const rows = page.locator("section", { hasText: /changes like this/i }).getByRole("button");
     if ((await rows.count()) > 1) await moveTo(page, rows.nth(1));
     await pause(page, 2600);
   },
@@ -191,8 +191,8 @@ const STEPS = {
     const name = page.getByLabel(/area name/i);
     if (await name.waitFor({ timeout: 8000 }).then(() => true, () => false)) {
       await pause(page, 800);
+      await name.fill("");
       await name.pressSequentially(WATCH_NAME, { delay: 60 });
-      await click(page, page.getByRole("button", { name: /^watch$/i }));
     }
     clip.cut();
     const replay = page.getByRole("button", { name: /replay passes/i }).first();
@@ -225,7 +225,7 @@ const STEPS = {
     const mid = { x: s.x + s.width / 2, y: s.y + s.height / 2 };
     await drag(page, { x: mid.x - 160, y: mid.y + 40 }, { x: mid.x + 120, y: mid.y - 10 }, 16);
     await pause(page, 300);
-    await click(page, page.getByRole("button", { name: /^play$/i }).first());
+    await click(page, page.getByRole("button", { name: /^play/i }).first());
     await pause(page, 4400);
     await drag(page, { x: mid.x + 120, y: mid.y }, { x: mid.x - 40, y: mid.y + 30 }, 12);
     await pause(page, 600);
