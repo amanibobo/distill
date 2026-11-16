@@ -13,6 +13,48 @@
   --nasa-blue: #0b3d91;
   --nasa-red: #fc3d21;
   --ground: var(--surface);
+  --glass: rgb(255 255 255 / 0.88);
+  --line-strong: #d6d6d6;
+  --tip-bg: #111;
+  --tip-ink: #fff;
+  --logo: #0b3d91;
+  color-scheme: light;
+}
+
+:root[data-theme="dark"] {
+  --surface: #0f1011;
+  --raised: #17181a;
+  --line: #2a2b2e;
+  --ink: #ececea;
+  --ink-2: #a3a39e;
+  --ink-3: #6e6e6a;
+  --hover: #212225;
+  --select-tint: rgb(47 123 246 / 0.2);
+  --glass: rgb(23 24 26 / 0.88);
+  --line-strong: #3a3b3f;
+  --tip-bg: #ececea;
+  --tip-ink: #111;
+  --logo: #5b8ef0;
+  color-scheme: dark;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --surface: #0f1011;
+    --raised: #17181a;
+    --line: #2a2b2e;
+    --ink: #ececea;
+    --ink-2: #a3a39e;
+    --ink-3: #6e6e6a;
+    --hover: #212225;
+    --select-tint: rgb(47 123 246 / 0.2);
+    --glass: rgb(23 24 26 / 0.88);
+    --line-strong: #3a3b3f;
+    --tip-bg: #ececea;
+    --tip-ink: #111;
+    --logo: #5b8ef0;
+    color-scheme: dark;
+  }
 }
 
 * {

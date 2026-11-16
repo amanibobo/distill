@@ -259,8 +259,8 @@
   padding: 0 12px;
   border: 0;
   border-radius: 8px;
-  background: #111;
-  color: #fff;
+  background: var(--tip-bg);
+  color: var(--tip-ink);
   font-size: 13px;
   cursor: pointer;
   transition: background 150ms ease-out;

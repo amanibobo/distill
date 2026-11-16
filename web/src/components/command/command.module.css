@@ -440,7 +440,7 @@
 }
 
 .trigger:hover {
-  border-color: #dcdcdc;
+  border-color: var(--line-strong);
   color: var(--ink-2);
 }
 

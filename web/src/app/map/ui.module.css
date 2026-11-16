@@ -1,7 +1,7 @@
 .logo {
   height: 18px;
   width: auto;
-  color: var(--nasa-blue);
+  color: var(--logo);
 }
 
 .tabs {
@@ -257,7 +257,7 @@
 
 .map :global(.maplibregl-ctrl-scale) {
   border-color: var(--ink-3);
-  background: rgb(255 255 255 / 0.8);
+  background: var(--glass);
   color: var(--ink-2);
   font-size: 11px;
 }
@@ -280,8 +280,8 @@
   padding: 0 18px;
   transform: translate(-50%, -50%);
   border-radius: 14px;
-  background: #111;
-  color: #fff;
+  background: var(--tip-bg);
+  color: var(--tip-ink);
   font-size: 20px;
   pointer-events: none;
   box-shadow: 0 8px 30px rgb(0 0 0 / 0.18);
@@ -297,7 +297,8 @@
 
 .toast small {
   font-size: 13px;
-  color: rgb(255 255 255 / 0.75);
+  color: var(--tip-ink);
+  opacity: 0.75;
 }
 
 @keyframes toast {

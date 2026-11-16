@@ -19,7 +19,7 @@ import ui from "./ui.module.css";
 
 setWorkerUrl("/maplibre-gl-worker.mjs");
 
-const BASEMAP = "https://basemaps.cartocdn.com/gl/positron-gl-style/style.json";
+const basemap = (dark: boolean) => `https://basemaps.cartocdn.com/gl/${dark ? "dark-matter" : "positron"}-gl-style/style.json`;
 const EMPTY: FeatureCollection = { type: "FeatureCollection", features: [] };
 const MIN_DRAG_PX = 8;
 const BLANK_IMAGE = "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
@@ -46,6 +46,7 @@ export type Radar = { url: string; coordinates: [[number, number], [number, numb
 export type Focus = { bbox: [number, number, number, number]; key: string; maxZoom?: number };
 
 type Props = {
+  dark: boolean;
   sites: SitePoint;
   shapes: EventShapes;
   radar: Radar;
@@ -76,7 +77,8 @@ export type { MapLibre };
 export function MapView(props: Props) {
   const container = useRef<HTMLDivElement>(null);
   const mapRef = useRef<MapLibre | null>(null);
-  const [ready, setReady] = useState(false);
+  const [styleVersion, setStyleVersion] = useState(0);
+  const ready = styleVersion > 0;
   const [tip, setTip] = useState<{ x: number; y: number; text: string } | null>(null);
   const handlers = useRef(props);
   useEffect(() => {
@@ -88,7 +90,7 @@ export function MapView(props: Props) {
     const cam = props.initialCamera;
     const map = new MapLibre({
       container: container.current,
-      style: BASEMAP,
+      style: basemap(props.dark),
       center: cam ? [cam.lng, cam.lat] : [-20, 30],
       zoom: cam ? cam.zoom : 1.8,
       renderWorldCopies: false,
@@ -162,7 +164,7 @@ export function MapView(props: Props) {
       map.addSource("area", { type: "geojson", data: EMPTY });
       map.addLayer({ id: "area-fill", type: "fill", source: "area", paint: { "fill-color": "#2b2b2b", "fill-opacity": 0.04 } });
       map.addLayer({ id: "area-line", type: "line", source: "area", paint: { "line-color": "#2b2b2b", "line-width": 1.5, "line-dasharray": [3, 2] } });
-      setReady(true);
+      setStyleVersion((v) => v + 1);
     });
 
     let start: { lngLat: LngLat; x: number; y: number } | null = null;
@@ -224,49 +226,49 @@ export function MapView(props: Props) {
   }, []);
 
   useEffect(() => {
-    if (!ready) return;
+    if (!styleVersion) return;
     (mapRef.current?.getSource("sites") as GeoJSONSource | undefined)?.setData(props.sites);
-  }, [ready, props.sites]);
+  }, [styleVersion, props.sites]);
 
   useEffect(() => {
-    if (!ready) return;
+    if (!styleVersion) return;
     (mapRef.current?.getSource("events") as GeoJSONSource | undefined)?.setData(props.shapes);
-  }, [ready, props.shapes]);
+  }, [styleVersion, props.shapes]);
 
   useEffect(() => {
     const map = mapRef.current;
-    if (!ready || !map || !props.selectedId) return;
+    if (!styleVersion || !map || !props.selectedId) return;
     const id = props.selectedId;
     map.setFeatureState({ source: "events", id }, { selected: true });
     return () => {
       if (map.getSource("events")) map.setFeatureState({ source: "events", id }, { selected: false });
     };
-  }, [ready, props.selectedId, props.shapes]);
+  }, [styleVersion, props.selectedId, props.shapes]);
 
   useEffect(() => {
     const map = mapRef.current;
-    if (!ready || !map || !props.hoveredId) return;
+    if (!styleVersion || !map || !props.hoveredId) return;
     const id = props.hoveredId;
     map.setFeatureState({ source: "events", id }, { hover: true });
     return () => {
       if (map.getSource("events")) map.setFeatureState({ source: "events", id }, { hover: false });
     };
-  }, [ready, props.hoveredId, props.shapes]);
+  }, [styleVersion, props.hoveredId, props.shapes]);
 
   useEffect(() => {
     const map = mapRef.current;
-    if (!ready || !map) return;
+    if (!styleVersion || !map) return;
     const ids = props.highlightIds;
     for (const id of ids) map.setFeatureState({ source: "events", id }, { similar: true });
     return () => {
       if (map.getSource("events")) for (const id of ids) map.setFeatureState({ source: "events", id }, { similar: false });
     };
-  }, [ready, props.highlightIds, props.shapes]);
+  }, [styleVersion, props.highlightIds, props.shapes]);
 
   useEffect(() => {
-    if (!ready) return;
+    if (!styleVersion) return;
     (mapRef.current?.getSource("area") as GeoJSONSource | undefined)?.setData(polygons(props.area ? [props.area] : []));
-  }, [ready, props.area]);
+  }, [styleVersion, props.area]);
 
   useEffect(() => {
     const map = mapRef.current;
@@ -278,11 +280,20 @@ export function MapView(props: Props) {
 
   useEffect(() => {
     const map = mapRef.current;
-    if (!ready || !map) return;
+    if (!styleVersion || !map) return;
     const src = map.getSource("radar") as ImageSource | undefined;
     if (props.radar) src?.updateImage({ url: props.radar.url, coordinates: props.radar.coordinates });
     map.setPaintProperty("radar", "raster-opacity", props.radar ? props.radarOpacity : 0);
-  }, [ready, props.radar, props.radarOpacity]);
+  }, [styleVersion, props.radar, props.radarOpacity]);
+
+  const dark = props.dark;
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !ready) return;
+    map.setStyle(basemap(dark));
+    // Restyle only when the theme flips; the style.load handler re-adds every layer.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dark]);
 
   const focusKey = props.focus?.key;
   useEffect(() => {

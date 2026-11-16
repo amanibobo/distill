@@ -66,6 +66,49 @@
   },
   {
     "site": {
+      "id": "huelva",
+      "name": "Huelva wildfire",
+      "place": "Niebla and Do\u00f1ana edge, Huelva, Spain",
+      "bbox": [
+        -6.75,
+        37.4,
+        -6.24,
+        37.65
+      ],
+      "track": 23
+    },
+    "passes": 11,
+    "events": 24,
+    "types": {
+      "fire_scar": 2,
+      "other": 18,
+      "crop_growth": 4
+    },
+    "scores": [
+      {
+        "type": "fire_scar",
+        "source": "Copernicus EMS EMSR913 burnt area",
+        "when": null,
+        "pixels": {
+          "precision": 0.809,
+          "recall": 0.915,
+          "iou": 0.752,
+          "predicted_km2": 380.8,
+          "truth_km2": 336.6
+        },
+        "events": {
+          "events_scored": 19,
+          "tp": 2,
+          "tn": 17,
+          "fp": 0,
+          "fn": 0,
+          "accuracy": 1.0
+        }
+      }
+    ]
+  },
+  {
+    "site": {
       "id": "iowa",
       "name": "Central Iowa harvest",
       "place": "Story and Boone counties, Iowa, USA",
@@ -124,7 +167,8 @@
     "passes": 10,
     "events": 111,
     "types": {
-      "other": 73,
+      "other": 70,
+      "crop_growth": 3,
       "fire_scar": 37,
       "harvest": 1
     },
@@ -147,6 +191,49 @@
           "fp": 5,
           "fn": 6,
           "accuracy": 0.898
+        }
+      }
+    ]
+  },
+  {
+    "site": {
+      "id": "viotia",
+      "name": "Viotia wildfires",
+      "place": "Vilia and Kaparelli, Viotia, Greece",
+      "bbox": [
+        22.95,
+        37.99,
+        23.44,
+        38.31
+      ],
+      "track": 158
+    },
+    "passes": 11,
+    "events": 75,
+    "types": {
+      "other": 64,
+      "crop_growth": 5,
+      "fire_scar": 6
+    },
+    "scores": [
+      {
+        "type": "fire_scar",
+        "source": "Copernicus EMS EMSR909 burnt area",
+        "when": null,
+        "pixels": {
+          "precision": 0.704,
+          "recall": 0.792,
+          "iou": 0.594,
+          "predicted_km2": 164.9,
+          "truth_km2": 146.5
+        },
+        "events": {
+          "events_scored": 35,
+          "tp": 4,
+          "tn": 27,
+          "fp": 2,
+          "fn": 2,
+          "accuracy": 0.886
         }
       }
     ]

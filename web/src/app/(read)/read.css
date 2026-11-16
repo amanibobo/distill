@@ -43,7 +43,7 @@
 .logo {
   height: 0.95em;
   width: auto;
-  color: var(--nasa-blue);
+  color: var(--logo);
 }
 
 .read-main {
@@ -85,7 +85,7 @@
 
 .read-main a {
   color: inherit;
-  text-decoration-color: rgb(0 0 0 / 0.3);
+  text-decoration-color: var(--ink-3);
   text-underline-offset: 0.2em;
 }
 
@@ -244,7 +244,7 @@
 .links-title {
   margin: 0;
   font: 400 11px/1.4 var(--font-mono);
-  color: rgb(11 11 10 / 0.45);
+  color: var(--ink-3);
 }
 
 .links {
@@ -254,7 +254,7 @@
 }
 
 .links li + li {
-  border-top: 1px solid rgb(11 11 10 / 0.07);
+  border-top: 1px solid var(--line);
 }
 
 .links a {
@@ -264,7 +264,7 @@
   padding: 12px 8px;
   margin: 0 -8px;
   border-radius: 8px;
-  color: #0b0b0a;
+  color: var(--ink);
   font-size: 15px;
   line-height: 1.7;
   text-decoration: none;
@@ -272,7 +272,7 @@
 }
 
 .links a:hover {
-  background: rgb(11 11 10 / 0.035);
+  background: var(--hover);
 }
 
 .links a:focus-visible {
@@ -284,7 +284,7 @@
   width: 16px;
   height: 16px;
   flex-shrink: 0;
-  color: rgb(11 11 10 / 0.7);
+  color: var(--ink-2);
   fill: currentColor;
   transition: color 0.15s ease;
 }
@@ -295,7 +295,7 @@
 }
 
 .links a:hover .icon {
-  color: #0b0b0a;
+  color: var(--ink);
 }
 
 .links-label {
@@ -304,19 +304,19 @@
 
 .links .meta {
   font: 400 12px var(--font-mono);
-  color: rgb(11 11 10 / 0.45);
+  color: var(--ink-3);
 }
 
 .links .arrow {
   width: 12px;
   height: 12px;
-  color: rgb(11 11 10 / 0.45);
+  color: var(--ink-3);
   transition: transform 0.2s cubic-bezier(0.3, 0.7, 0.2, 1), color 0.15s ease;
 }
 
 .links a:hover .arrow {
   transform: translate(2px, -2px);
-  color: #0b0b0a;
+  color: var(--ink);
 }
 
 
@@ -330,14 +330,44 @@
   width: 100%;
   height: auto;
   aspect-ratio: 8 / 5;
-  border: 1px solid rgb(11 11 10 / 0.07);
+  border: 1px solid var(--line);
   border-radius: 14px;
-  background: #fff;
+  background: var(--raised);
 }
 
 .clip figcaption {
   margin-top: 10px;
-  color: rgb(11 11 10 / 0.45);
+  color: var(--ink-3);
   font-size: 13px;
   line-height: 1.5;
+}
+
+.read-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.theme-btn {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--raised);
+  color: var(--ink-2);
+  cursor: pointer;
+  transition: color 0.15s ease, background-color 0.15s ease;
+}
+
+.theme-btn:hover {
+  color: var(--ink);
+  background: var(--hover);
+}
+
+.theme-btn svg {
+  width: 16px;
+  height: 16px;
+  stroke-width: 1.5;
 }
