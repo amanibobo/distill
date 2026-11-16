@@ -9,3 +9,4 @@ pipeline/cache/
 .DS_Store
 *.log
 .next-build/
+dataset/
