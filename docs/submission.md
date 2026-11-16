@@ -116,7 +116,7 @@ Hardware: one laptop. The pipeline runs locally, with no cloud compute.
 
 ## Project details (paste this one; answers the form's questions)
 
-Remove "[if it ships]" lines for features not live at submission.
+Live app: https://distill-khaki.vercel.app. Code: https://github.com/amanibobo/distill.
 
 ### What does it do, and how does it work?
 
@@ -125,9 +125,9 @@ Distill turns radar from NASA and ISRO's NISAR satellite into a map of how Earth
 - Pick a place, press play, and watch changes appear pass by pass over the real radar image, colored by type: flood, fire scar, harvest, crop growth.
 - Click a change to see when it started, when it peaked, whether it's still going, how big it is, a confidence score, and a plain-English reason, such as "the canopy is gone and the patch grew over five passes."
 - Ask questions like "where did farmland flood since August?" The map shows the matches and the filter it understood, so you can correct it.
-- [if it ships] Draw a box around an area and get an alert when a new pass shows change.
-- [if it ships] See ground motion from the June 2026 Venezuela earthquakes in 3D.
-- [if it ships] Click any change and find places where the ground changed the same way.
+- Draw a box around an area, press Watch, and replay past passes to see alerts fire as change appears.
+- See ground motion from the June 2026 Venezuela earthquakes in 3D: NISAR interferometry draped over terrain, up to about 32 cm toward the satellite.
+- Click any change and find places where the ground changed the same way, even at another site. A Washington burn scar's closest match is a burn in Assam.
 
 How it works:
 
@@ -137,7 +137,7 @@ How it works:
 - Readable rules label each change from how the radar's two polarizations moved, the land cover underneath, and the timing. Claude writes a short caption from the same numbers.
 - We score every label against independent maps: official fire perimeters, USDA crop maps, and Sentinel-1 water maps.
 
-It covers three real events: the Kaiser Canyon Fire in Washington, the central Iowa harvest, and the Upper Assam monsoon floods in India. That's 1,049 changes across 31 radar passes.
+It covers four real events: the Kaiser Canyon Fire in Washington, the central Iowa harvest, the Upper Assam monsoon floods in India, and the 24 June 2026 earthquakes in Venezuela. That's 1,058 changes across 32 radar passes, plus a 3D view of the Venezuela earthquakes.
 
 ### What benefits does it have?
 
@@ -170,6 +170,7 @@ Disaster responders, farmers, insurers, journalists and students should all be a
 - **Honesty over polish.** L-band radar barely sees burned grass, so we only find about a quarter of the Kaiser Canyon burn (precision 0.88). In Assam, rice paddies flooded for planting look like floods, so flood detection there is weak, about 5% of the flooded area. We label those cases as uncertain and publish the scores, instead of hiding them. Iowa's harvest scores well: precision 0.91, recall 0.93.
 - **Tight constraints.** The machine had under 3 GB of free disk, and radar passes come every 12 days. Both shaped the design: stream the data, and reason over time.
 - **Accessibility.** Plain language everywhere, keyboard shortcuts, and colors checked for color blindness, with every type also named in text.
+- **Stated assumptions.** The NISAR interferogram product does not state its sign convention, so the 3D view follows the standard ISCE and ARIA convention, and we say so.
 - **Responsible AI.** Claude only writes captions and parses search questions, from numbers the pipeline computed. It never decides what changed, and we disclose where AI was used.
 
 ## Use of Super Intelligence (SI)
