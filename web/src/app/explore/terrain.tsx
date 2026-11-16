@@ -4,6 +4,7 @@ import { OrbitControls } from "@react-three/drei";
 import { Canvas, useFrame } from "@react-three/fiber";
 import { type ComponentRef, type RefObject, useEffect, useMemo, useRef } from "react";
 import * as THREE from "three";
+import { useTheme } from "@/lib/theme";
 import type { Field } from "./field";
 import styles from "./explore.module.css";
 
@@ -203,13 +204,14 @@ export function Terrain({ field, exaggeration, blend, showMotion, resetKey }: Pr
   const controls = useRef<ComponentRef<typeof OrbitControls>>(null);
   const labels = useRef<(HTMLSpanElement | null)[]>([]);
   const points = useMemo(() => epicenterPoints(field, exaggeration), [field, exaggeration]);
+  const background = useTheme() === "dark" ? "#17181a" : "#ffffff";
   useEffect(() => {
     if (resetKey > 0) controls.current?.reset();
   }, [resetKey]);
   return (
     <>
       <Canvas camera={{ position: [0, 8.4, 12], fov: 38, near: 0.05, far: 200 }} dpr={[1, 2]} gl={{ antialias: true }}>
-        <color attach="background" args={["#ffffff"]} />
+        <color attach="background" args={[background]} />
         <Surface field={field} exaggeration={exaggeration} blend={blend} showMotion={showMotion} />
         <Epicenters points={points} />
         <LabelTracker points={points} labels={labels} />
