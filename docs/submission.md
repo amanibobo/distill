@@ -12,11 +12,9 @@ Distill
 
 Distill turns NISAR radar into a map of how Earth's surface is changing, and explains every change in plain words.
 
-## High-level project summary
+## High-level project summary (final; paste this one, 160 words)
 
-(Form field: High-Level Project Summary. 143 words.)
-
-Distill is a map of how Earth's surface is changing, read from NISAR's L-band radar. Radar sees the ground through cloud, smoke and darkness, but to most people its images look like static. Distill streams NISAR GCOV data for each site and stacks every pass into one cube of place and time. It finds change as events with an onset, a peak and, when it ends, a recovery. Each event gets a type, a confidence and a plain-English reason for its label. We score every label against independent maps (fire perimeters, crop surveys and Sentinel-1 water) and publish the scores, good or bad. The first version covers the Upper Assam floods, the Kaiser Canyon Fire and the central Iowa harvest. It is for people who need to know what changed on the ground and when, such as land managers, farmers, journalists and students.
+Distill turns radar from NASA and ISRO's NISAR satellite into a map of how Earth's surface changed in 2026, at https://distill-khaki.vercel.app. The challenge asks for an interactive app that uses NISAR data to track and visualize surface change. Distill reads NISAR passes for seven sites on four continents and finds 1,410 changes: wildfires in Washington, Spain and Greece, the Iowa harvest, the Assam monsoon and Amazon forest clearing. It also shows ground motion in 3D from five 2026 earthquakes. Each change has a start, a peak, a confidence score and a plain-English reason. You can press play to watch a fire scar grow pass by pass, ask questions with ⌘K, find similar changes at other sites, and watch an area for new passes. We score every label against independent maps and publish the results, including the weak ones. Radar sees through clouds, smoke and darkness, but few people can read it. Distill makes NISAR's open data usable without radar training. We also released every labeled event as an open dataset on Hugging Face.
 
 ## Detailed project description
 
