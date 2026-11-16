@@ -83,8 +83,9 @@ export default function Home() {
             satellite&rsquo;s water maps. <Mark tone="red">The scores are published, good or bad.</Mark>
           </p>
           <p>
-            It covers real 2026 events so far: the Upper Assam floods, the Kaiser Canyon Fire and the harvest in central Iowa,
-            plus ground motion in 3D from five earthquakes in Venezuela, Japan, Indonesia and Panama.
+            It covers real 2026 events on four continents: wildfires in Washington, Spain and Greece, the harvest in central Iowa,
+            the monsoon season in Upper Assam and forest clearing in the Brazilian Amazon, plus ground motion in 3D from five
+            earthquakes in Venezuela, Japan, Indonesia and Panama.
           </p>
         </Highlights>
       </section>

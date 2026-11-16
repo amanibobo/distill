@@ -54,6 +54,14 @@ export function ExploreSection() {
         only the before and after.
       </p>
       <ExploreSketch />
+      <p>
+        The same pipeline covers four more 2026 earthquakes: the M7.5 shock near Catia La Mar, Venezuela; the M6.8 Kumamoto
+        earthquake in Japan, with a clean two-lobed pattern across the fault; the M7.8 Flores Sea earthquake in Indonesia, seen
+        from the coast; and the M7.7 Panama earthquake, where the ground moved up to about 1.45 m toward the satellite. Three
+        candidates were dropped: the Colombia quake was 116 km deep and left no coherent signal, the Fuego eruption showed nothing
+        centred on the volcano, and the Nagqu quake had no provisional interferogram pair. The sign convention is inferred from the
+        ISCE and ARIA standard, because the NISAR product does not state it.
+      </p>
     </section>
   );
 }

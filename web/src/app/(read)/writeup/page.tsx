@@ -3,10 +3,11 @@ import { Label, Mono } from "@/components/prose";
 import accuracy from "@/data/accuracy.json";
 import { CubeSketch, FireSignalSketch, PipelineSketch, RulesSketch, ServingSketch } from "./diagrams";
 import { ExploreSection } from "./explore-section";
+import { Clip } from "@/components/clip";
 
 export const metadata: Metadata = { title: "Writeup · Distill" };
 
-const TYPE_LABEL: Record<string, string> = { flood: "Flood", fire_scar: "Fire scar", harvest: "Harvest", crop_growth: "Crop growth" };
+const TYPE_LABEL: Record<string, string> = { flood: "Flood", fire_scar: "Fire scar", harvest: "Harvest", crop_growth: "Crop growth", deforestation: "Deforestation" };
 const fmt = (v: number | null) => (v === null ? "n/a" : v.toFixed(2));
 
 type Score = {
@@ -39,7 +40,9 @@ export default function Writeup() {
         </p>
         <p>
           Each site uses one orbit track, so every pass sees the ground from the same angle. That gives 9 to 12 passes per site,
-          twelve days apart.
+          twelve days apart. There are seven radar sites: the Kaiser Canyon Fire in Washington, three European wildfires (Huelva
+          and the Gredos foothills in Spain, Viotia in Greece), the harvest in central Iowa, the monsoon season in Upper Assam,
+          and forest clearing at São Félix do Xingu in the Brazilian Amazon.
         </p>
       </section>
 
@@ -102,7 +105,9 @@ export default function Writeup() {
       <section aria-labelledby="accuracy">
         <Label id="accuracy">how well it works</Label>
         <p>
-          {totalEvents} events across {report.length} sites, each scored against a map Distill never saw while it was being built.
+          {totalEvents.toLocaleString("en-US")} events across {report.length} sites, each scored against an independent map. Two
+          rules were written after looking at their own site&rsquo;s map, the Assam planting-water rule and the Xingu clearing
+          rule, so those two rows are not blind checks. Every other threshold was set from the radar alone.
           Pixel scores ask whether the area labeled with a type matches the reference. Event scores ask whether each event that
           clearly sits inside the reference, or clearly outside it, got the right label.
         </p>
@@ -143,12 +148,57 @@ export default function Writeup() {
         </div>
         <h3>What the numbers do not say</h3>
         <p>
-          Fire recall is low because L-band brightness barely changes over burned grass. Interferometric coherence would catch it,
-          and that is the next data product to add. Harvest recall is probably inflated because radar also sees crops drying before
+          Where a fire burned forest and shrubland, as at Huelva, Distill matches the official Copernicus burned-area map well.
+          Where it burned grass, as at Kaiser Canyon and in the Gredos foothills, recall is low because L-band brightness barely
+          changes over burned grass. Interferometric coherence would catch it, and that is the next data product to add. Xingu&rsquo;s
+          precision is a lower bound, because the INPE DETER reference only maps clearings of 3 hectares or more. Harvest recall is probably inflated because radar also sees crops drying before
           they are cut. The Iowa reference is the 2021 crop map, because the 2025 service was down on the day of the run, and corn
           and soybeans rotate on the same fields. Assam is checked against Sentinel-1 water maps, which share some of radar&rsquo;s
           blind spots.
         </p>
+      </section>
+
+      <section aria-labelledby="ask">
+        <Label id="ask">asking questions</Label>
+        <p>
+          Press <Mono>⌘K</Mono> and ask anything. Claude answers by calling five real tools over the events table: list the sites,
+          search events with a typed filter, count them, open one event, and find similar ones. Each call streams into the palette
+          as it happens, with its result and how long it took, then the answer streams in with the event ids it used. Claude never
+          decides what changed. It only reads what the pipeline computed, and it says plainly when the data does not cover a place.
+        </p>
+        <Clip
+          name="ask"
+          label="The command palette streaming Claude's tool calls for a question about growing fires"
+          caption="Each tool call shows up as it runs, then the answer and the matching changes."
+        />
+      </section>
+
+      <section aria-labelledby="similar">
+        <Label id="similar">changes like this</Label>
+        <p>
+          Every event has a 32-number signature: how HH and HV moved at fixed offsets from its start, how far it spread, how long it
+          lasted and whether it came back. Signatures are compared by cosine distance in pgvector, so a burn in Washington can find
+          its closest match in Greece. No one has to name the pattern first.
+        </p>
+        <Clip
+          name="similar"
+          label="Finding changes similar to a Kaiser Canyon burn scar across every site"
+          caption="Find similar searches every site by how the radar signal behaved, not by label."
+        />
+      </section>
+
+      <section aria-labelledby="watch">
+        <Label id="watch">watching an area</Label>
+        <p>
+          Draw a box, or start from any change, and press Watch. Replay steps through the past passes so you can see which ones would
+          have raised an alert. A daily job also asks NASA&rsquo;s ASF archive for new NISAR passes over every watched area and records
+          them. Today those passes wait to be processed by hand; running detection on them in the cloud is the next step.
+        </p>
+        <Clip
+          name="watch"
+          label="Watching an area on the Kaiser Canyon Fire and replaying passes as alerts appear"
+          caption="Watch any area. Replay shows which passes would have raised an alert."
+        />
       </section>
 
       <ExploreSection />
@@ -157,14 +207,17 @@ export default function Writeup() {
         <Label id="stack">serving it</Label>
         <ServingSketch />
         <p>
-          The browser never touches radar files. The map asks for one site at a time and gets each event with its footprints, which
-          the timeline swaps as you scrub. The grayscale radar under the shapes is one WebP image per pass, reprojected to longitude
-          and latitude. The URL holds the site, event, pass and camera, so any view can be shared.
+          The browser never touches radar files. The map asks for one site at a time and gets each event with its footprints,
+          which the pass filmstrip swaps as you scrub. The grayscale radar under the shapes is one WebP image per pass, reprojected
+          to longitude and latitude. The URL holds the site, event, pass and camera, so any view can be shared, and the map follows
+          the URL while it is open. Search streams from one route as newline-delimited JSON.
         </p>
         <p>
           Code: the pipeline is Python with <Mono>asf_search</Mono>, <Mono>h5py</Mono>, <Mono>scikit-image</Mono> and{" "}
           <Mono>rasterio</Mono>. The app is Next.js and MapLibre, with events in Postgres and PostGIS. Every decision is logged in the{" "}
-          <a href="https://github.com/amanibobo/distill/blob/main/docs/decisions.md">decisions file</a>.
+          <a href="https://github.com/amanibobo/distill/blob/main/docs/decisions.md">decisions file</a>. Every labeled event is also
+          published as an open dataset on{" "}
+          <a href="https://huggingface.co/datasets/amanibobo/nisar-surface-change-2026">Hugging Face</a>.
         </p>
       </section>
     </>
