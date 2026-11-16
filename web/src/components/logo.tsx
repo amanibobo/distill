@@ -1,18 +1,9 @@
-// A pixel droplet in the current text color (NASA blue on the reading pages), with one cell of NASA red.
-const ROWS = ["..X..", "..X..", ".XXX.", "XXXXX", "XXRXX", ".XXX."] as const;
-const COLORS: Record<string, string> = { X: "currentColor", R: "#fc3d21" };
-const CELL = 10;
-const GAP = 1.5;
-const STEP = CELL + GAP;
-
+// A water droplet in the current text color, with a soft highlight.
 export function LogoMark({ className }: { className?: string }) {
   return (
-    <svg viewBox={`0 0 ${5 * STEP - GAP} ${ROWS.length * STEP - GAP}`} className={className} aria-hidden>
-      {ROWS.flatMap((row, y) =>
-        [...row].flatMap((c, x) =>
-          c === "." ? [] : [<rect key={`${x}-${y}`} x={x * STEP} y={y * STEP} width={CELL} height={CELL} rx={1.6} fill={COLORS[c]} />],
-        ),
-      )}
+    <svg viewBox="0 0 20 26" className={className} aria-hidden>
+      <path d="M10 1.2C10 1.2 2 10.6 2 16.6a8 8 0 0 0 16 0C18 10.6 10 1.2 10 1.2Z" fill="currentColor" />
+      <path d="M6.2 16.9a3.9 3.9 0 0 0 3.6 3.9" fill="none" stroke="#fff" strokeOpacity="0.55" strokeWidth="1.6" strokeLinecap="round" />
     </svg>
   );
 }
