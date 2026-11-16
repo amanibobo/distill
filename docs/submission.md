@@ -12,9 +12,15 @@ Distill
 
 Distill turns NISAR radar into a map of how Earth's surface is changing, and explains every change in plain words.
 
-## High-level project summary (final; paste this one, 160 words)
+## High-level project summary (final, unslopped; paste this one, 166 words)
 
-Distill turns radar from NASA and ISRO's NISAR satellite into a map of how Earth's surface changed in 2026, at https://distill-khaki.vercel.app. The challenge asks for an interactive app that uses NISAR data to track and visualize surface change. Distill reads NISAR passes for seven sites on four continents and finds 1,410 changes: wildfires in Washington, Spain and Greece, the Iowa harvest, the Assam monsoon and Amazon forest clearing. It also shows ground motion in 3D from five 2026 earthquakes. Each change has a start, a peak, a confidence score and a plain-English reason. You can press play to watch a fire scar grow pass by pass, ask questions with ⌘K, find similar changes at other sites, and watch an area for new passes. We score every label against independent maps and publish the results, including the weak ones. Radar sees through clouds, smoke and darkness, but few people can read it. Distill makes NISAR's open data usable without radar training. We also released every labeled event as an open dataset on Hugging Face.
+Distill turns radar from NASA and ISRO's NISAR satellite into a map of how Earth's surface changed in 2026. It is live at https://distill-khaki.vercel.app.
+
+The challenge asks for an interactive app that tracks and visualizes surface change with NISAR data. Distill reads NISAR passes over seven sites on four continents. It found 1,410 changes there: wildfires in Washington, Spain and Greece, the Iowa harvest, the Assam monsoon and forest clearing in the Amazon. It also shows ground motion in 3D from five 2026 earthquakes.
+
+Each change has a start date, a peak date, a confidence score and a plain-English reason for its label. You can press play to watch a fire scar grow pass by pass. You can also ask questions with ⌘K, find similar changes at other sites, and watch an area for new passes.
+
+We compare every label with an independent map and publish all the scores, including the low ones. Radar sees through clouds, smoke and darkness, but few people can read radar images. Distill lets anyone use NISAR's open data without radar training. We released every labeled event as an open dataset on Hugging Face.
 
 ## Detailed project description
 
